@@ -365,7 +365,8 @@ Use polymorphic association: `System belongs_to :mode_detail, polymorphic: true`
 
 ### Branches
 - Feature branches from `main`
-- Naming: `feature/channel-reordering`, `fix/tone-validation`
+- Naming: `feature/issue-number-brief-description` (e.g., `feature/22-radio-model-views`)
+- **ONE branch per issue ticket** - each GitHub issue gets its own dedicated branch and PR
 
 ### Commits
 - Clear, present-tense messages
@@ -469,16 +470,17 @@ When helping with this project:
 
 1. **Always start with tests** - Write failing test before implementation
 2. **Follow TDD cycle** - Red → Green → Refactor
-3. **Use Rails conventions** - RESTful routes, skinny controllers, etc.
-4. **Reference docs** - Check `docs/MODELS.md` and `docs/ARCHITECTURE.md`
-5. **Ask clarifying questions** - Domain knowledge (radios) may be unclear
-6. **Consider performance** - N+1 queries, indexes, caching
-7. **Think about UI/UX** - Hotwire for dynamic interactions
-8. **Security first** - Validate input, check authorization
-9. **Keep it simple** - KISS principle, don't over-engineer
-10. **Document decisions** - Update docs for significant changes
-11. **STOP before PRs** - Always ask for user confirmation before creating pull requests
-12. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
+3. **One branch per issue** - Each GitHub issue ticket gets its own dedicated branch and PR
+4. **Use Rails conventions** - RESTful routes, skinny controllers, etc.
+5. **Reference docs** - Check `docs/MODELS.md` and `docs/ARCHITECTURE.md`
+6. **Ask clarifying questions** - Domain knowledge (radios) may be unclear
+7. **Consider performance** - N+1 queries, indexes, caching
+8. **Think about UI/UX** - Hotwire for dynamic interactions
+9. **Security first** - Validate input, check authorization
+10. **Keep it simple** - KISS principle, don't over-engineer
+11. **Document decisions** - Update docs for significant changes
+12. **STOP before PRs** - Always ask for user confirmation before creating pull requests
+13. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
 
 ---
 
