@@ -1,0 +1,41 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h1 class="h3 mb-0">User Profile</h1>
+          <%= link_to "Edit Profile", edit_user_path(@user), class: "btn btn-sm btn-primary" %>
+        </div>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-3">Email:</dt>
+            <dd class="col-sm-9"><p class="mb-0"><%= @user.email %></p></dd>
+
+            <% if @user.name.present? %>
+              <dt class="col-sm-3">Name:</dt>
+              <dd class="col-sm-9"><%= @user.name %></dd>
+            <% end %>
+
+            <% if @user.callsign.present? %>
+              <dt class="col-sm-3">Callsign:</dt>
+              <dd class="col-sm-9"><%= @user.callsign %></dd>
+            <% end %>
+
+            <% if @user.default_power_level.present? %>
+              <dt class="col-sm-3">Default Power Level:</dt>
+              <dd class="col-sm-9"><%= @user.default_power_level %></dd>
+            <% end %>
+
+            <% if @user.measurement_preference.present? %>
+              <dt class="col-sm-3">Measurement Preference:</dt>
+              <dd class="col-sm-9"><%= @user.measurement_preference.capitalize %></dd>
+            <% end %>
+
+            <dt class="col-sm-3">Member Since:</dt>
+            <dd class="col-sm-9"><%= @user.created_at.strftime("%B %d, %Y") %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

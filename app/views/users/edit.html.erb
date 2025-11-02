@@ -1,0 +1,61 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="h3 mb-0">Edit Profile</h1>
+        </div>
+        <div class="card-body">
+          <%= form_with model: @user, url: user_path(@user), method: :patch do |f| %>
+            <% if @user.errors.any? %>
+              <div class="alert alert-danger">
+                <h5><%= pluralize(@user.errors.count, "error") %> prohibited this profile from being updated:</h5>
+                <ul class="mb-0">
+                  <% @user.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <div class="mb-3">
+              <%= f.label :email, class: "form-label" %>
+              <%= f.email_field :email, class: "form-control", required: true %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :name, class: "form-label" %>
+              <%= f.text_field :name, class: "form-control" %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :callsign, "Callsign (Optional)", class: "form-label" %>
+              <%= f.text_field :callsign, class: "form-control" %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :default_power_level, class: "form-label" %>
+              <%= f.select :default_power_level,
+                  options_for_select([["High", "High"], ["Medium", "Medium"], ["Low", "Low"]], @user.default_power_level),
+                  { include_blank: "Select power level" },
+                  class: "form-select" %>
+            </div>
+
+            <div class="mb-3">
+              <%= f.label :measurement_preference, class: "form-label" %>
+              <%= f.select :measurement_preference,
+                  options_for_select([["Metric", "metric"], ["Imperial", "imperial"]], @user.measurement_preference),
+                  { include_blank: "Select preference" },
+                  class: "form-select" %>
+            </div>
+
+            <div class="d-grid gap-2">
+              <%= f.submit "Update Profile", class: "btn btn-primary" %>
+              <%= link_to "Cancel", user_path(@user), class: "btn btn-secondary" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
