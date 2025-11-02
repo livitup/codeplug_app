@@ -1,0 +1,84 @@
+<div class="container mt-5">
+  <!-- Hero Section -->
+  <div class="px-4 py-5 text-center">
+    <h1 class="display-4 fw-bold">Welcome to Codeplug App</h1>
+    <div class="col-lg-6 mx-auto">
+      <p class="lead mb-4">
+        Your universal solution for managing two-way radio programming data. Create once, export everywhere.
+      </p>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="row g-4 py-5">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Universal Format</h5>
+          <p class="card-text">
+            Create your codeplug once in a universal format. No need to recreate for each radio model.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Multi-Radio Export</h5>
+          <p class="card-text">
+            Export to CSV formats for Motorola, Baofeng, Anytone, Kenwood, and dozens of other radio models.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Shared Resources</h5>
+          <p class="card-text">
+            Access community-maintained databases of repeaters, talkgroups, and networks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Features -->
+  <div class="row py-5">
+    <div class="col-lg-8 mx-auto">
+      <h2 class="mb-4">Key Features</h2>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <strong>Analog & Digital Support:</strong> Handle analog, DMR, P25, NXDN, and other modes
+        </li>
+        <li class="list-group-item">
+          <strong>Zone Management:</strong> Organize channels into zones with unlimited capacity
+        </li>
+        <li class="list-group-item">
+          <strong>Custom Layouts:</strong> Create and share CSV export formats for unsupported radios
+        </li>
+        <li class="list-group-item">
+          <strong>Smart Splitting:</strong> Automatically split large zones to match radio limitations
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="text-center py-5">
+    <% if logged_in? %>
+      <h3 class="mb-4">Ready to get started?</h3>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <%= link_to "View Radio Models", radio_models_path, class: "btn btn-primary btn-lg px-4 gap-3" %>
+      </div>
+    <% else %>
+      <h3 class="mb-4">Get started today</h3>
+      <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+        <%= link_to "Sign Up", new_user_path, class: "btn btn-primary btn-lg px-4 gap-3" %>
+        <%= link_to "Log In", login_path, class: "btn btn-outline-secondary btn-lg px-4" %>
+      </div>
+    <% end %>
+  </div>
+</div>

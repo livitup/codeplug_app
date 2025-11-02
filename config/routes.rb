@@ -21,6 +21,10 @@ Rails.application.routes.draw do
   resources :manufacturers
   resources :radio_models
 
+  # Static pages
+  get "help", to: "pages#help"
+  get "about", to: "pages#about"
+
   # Defines the root path route ("/")
-  root "sessions#new"
+  root "pages#home"
 end

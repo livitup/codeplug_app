@@ -25,6 +25,13 @@ class NavbarTest < ApplicationSystemTestCase
     click_button "Log In"
 
     within "nav.navbar" do
+      # User dropdown should be visible
+      assert_selector "a.dropdown-toggle", text: user.email
+
+      # Click to open user dropdown
+      find("a.dropdown-toggle", text: user.email).click
+
+      # Log Out button should be in dropdown
       assert_button "Log Out"
       assert_no_link "Log In"
     end
