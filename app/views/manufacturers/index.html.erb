@@ -20,14 +20,12 @@
               <td><%= link_to manufacturer.name, manufacturer_path(manufacturer) %></td>
               <td><%= manufacturer.radio_models.count %></td>
               <td class="text-end">
-                <div class="btn-group" role="group">
-                  <%= link_to "View", manufacturer_path(manufacturer), class: "btn btn-sm btn-info" %>
-                  <%= link_to "Edit", edit_manufacturer_path(manufacturer), class: "btn btn-sm btn-secondary" %>
-                  <%= button_to "Delete", manufacturer_path(manufacturer), method: :delete,
-                      class: "btn btn-sm btn-danger",
-                      form: { class: "d-inline" },
-                      data: { confirm: "Are you sure? This will prevent deletion if radio models exist." } %>
-                </div>
+                <%= link_to "View", manufacturer_path(manufacturer), class: "btn btn-sm btn-info me-1" %>
+                <%= link_to "Edit", edit_manufacturer_path(manufacturer), class: "btn btn-sm btn-secondary me-1" %>
+                <%= button_to "Delete", manufacturer_path(manufacturer), method: :delete,
+                    class: "btn btn-sm btn-danger",
+                    form: { class: "d-inline" },
+                    data: { confirm: "Are you sure? This will prevent deletion if radio models exist." } %>
               </td>
             </tr>
           <% end %>
