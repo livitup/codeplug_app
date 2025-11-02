@@ -17,7 +17,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       password: "password123"
     }
 
-    assert_redirected_to root_path
+    assert_redirected_to radio_models_path
     assert_equal "Logged in successfully!", flash[:notice]
     assert_equal user.id, session[:user_id]
   end
@@ -30,7 +30,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       password: "password123"
     }
 
-    assert_redirected_to root_path
+    assert_redirected_to radio_models_path
     assert_equal user.id, session[:user_id]
   end
 
@@ -72,7 +72,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_nil session[:user_id]
   end
 
-  test "should redirect logged-in user from login page to root" do
+  test "should redirect logged-in user from login page to radio models" do
     user = create(:user)
     post login_path, params: {
       email: user.email,
@@ -80,6 +80,6 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     }
 
     get login_path
-    assert_redirected_to root_path
+    assert_redirected_to radio_models_path
   end
 end

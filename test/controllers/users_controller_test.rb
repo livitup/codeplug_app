@@ -19,7 +19,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
         }
       }
     end
-    assert_redirected_to root_path
+    assert_redirected_to radio_models_path
     assert_equal "Account created successfully!", flash[:notice]
     assert session[:user_id].present?, "User should be logged in after registration"
   end

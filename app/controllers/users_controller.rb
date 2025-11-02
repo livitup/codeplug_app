@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     if @user.save
       log_in(@user)
       flash[:notice] = "Account created successfully!"
-      redirect_to root_path
+      redirect_to radio_models_path
     else
       flash.now[:alert] = "There was an error creating your account. Please check the form for errors."
       render :new, status: :unprocessable_entity
