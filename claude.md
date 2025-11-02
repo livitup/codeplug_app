@@ -377,6 +377,7 @@ Use polymorphic association: `System belongs_to :mode_detail, polymorphic: true`
 - Clear description of changes
 - Screenshots for UI changes
 - Squash merge to keep main clean
+- **IMPORTANT**: Always stop and ask for user confirmation before creating a PR
 
 ---
 
@@ -475,6 +476,7 @@ When helping with this project:
 8. **Security first** - Validate input, check authorization
 9. **Keep it simple** - KISS principle, don't over-engineer
 10. **Document decisions** - Update docs for significant changes
+11. **STOP before PRs** - Always ask for user confirmation before creating pull requests
 
 ---
 
