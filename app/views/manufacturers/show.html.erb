@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @manufacturer.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_manufacturer_path(@manufacturer), class: "btn btn-secondary" %>
+      <%= button_to "Delete", manufacturer_path(@manufacturer), method: :delete,
+          class: "btn btn-danger",
+          data: { confirm: "Are you sure? This will prevent deletion if radio models exist." } %>
+      <%= link_to "Back", manufacturers_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Manufacturer Details</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Name:</dt>
+        <dd class="col-sm-9"><%= @manufacturer.name %></dd>
+
+        <dt class="col-sm-3">Radio Models:</dt>
+        <dd class="col-sm-9"><%= @manufacturer.radio_models.count %></dd>
+      </dl>
+    </div>
+  </div>
+
+  <% if @manufacturer.radio_models.any? %>
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Radio Models</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Model Name</th>
+                <th>Supported Modes</th>
+                <th>Max Zones</th>
+                <th>Max Channels/Zone</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @manufacturer.radio_models.order(:name).each do |radio_model| %>
+                <tr>
+                  <td><%= link_to radio_model.name, radio_model_path(radio_model) %></td>
+                  <td><%= radio_model.supported_modes.join(", ") %></td>
+                  <td><%= radio_model.max_zones || "Unlimited" %></td>
+                  <td><%= radio_model.max_channels_per_zone || "Unlimited" %></td>
+                  <td class="text-end">
+                    <%= link_to "View", radio_model_path(radio_model), class: "btn btn-sm btn-info" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      No radio models found for this manufacturer.
+      <%= link_to "Add a radio model", new_radio_model_path, class: "alert-link" %>.
+    </div>
+  <% end %>
+</div>

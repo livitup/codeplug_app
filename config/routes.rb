@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :users, only: [ :new, :create, :show, :edit, :update ]
 
   # Radio hardware management
+  resources :manufacturers
   resources :radio_models
 
   # Defines the root path route ("/")
