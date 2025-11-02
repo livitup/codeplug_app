@@ -143,14 +143,4 @@ class RadioModelsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to radio_models_path
     assert_equal "Radio model was successfully deleted.", flash[:notice]
   end
-
-  private
-
-  # Helper method to simulate user login
-  def log_in_as(user)
-    post login_path, params: {
-      email: user.email,
-      password: "password123"
-    }
-  end
 end

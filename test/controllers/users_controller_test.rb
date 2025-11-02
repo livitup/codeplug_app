@@ -155,14 +155,4 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     user2.reload
     assert_equal "Original Name", user2.name
   end
-
-  private
-
-  # Helper method to simulate user login
-  def log_in_as(user)
-    post login_path, params: {
-      email: user.email,
-      password: "password123"
-    }
-  end
 end
