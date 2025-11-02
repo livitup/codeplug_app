@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_02_174034) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_02_175353) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,30 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_174034) do
     t.datetime "updated_at", null: false
     t.index ["manufacturer_id", "name"], name: "index_radio_models_on_manufacturer_id_and_name", unique: true
     t.index ["manufacturer_id"], name: "index_radio_models_on_manufacturer_id"
+  end
+
+  create_table "systems", force: :cascade do |t|
+    t.string "bandwidth"
+    t.string "city"
+    t.string "county"
+    t.datetime "created_at", null: false
+    t.decimal "latitude", precision: 10, scale: 6
+    t.decimal "longitude", precision: 10, scale: 6
+    t.string "mode", null: false
+    t.bigint "mode_detail_id", null: false
+    t.string "mode_detail_type", null: false
+    t.string "name", null: false
+    t.decimal "rx_frequency", precision: 10, scale: 6, null: false
+    t.string "rx_tone_value"
+    t.string "state"
+    t.boolean "supports_rx_tone", default: false
+    t.boolean "supports_tx_tone", default: false
+    t.decimal "tx_frequency", precision: 10, scale: 6, null: false
+    t.string "tx_tone_value"
+    t.datetime "updated_at", null: false
+    t.index ["latitude", "longitude"], name: "index_systems_on_latitude_and_longitude"
+    t.index ["mode"], name: "index_systems_on_mode"
+    t.index ["mode_detail_type", "mode_detail_id"], name: "index_systems_on_mode_detail"
   end
 
   create_table "talk_groups", force: :cascade do |t|
