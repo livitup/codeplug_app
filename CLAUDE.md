@@ -378,6 +378,7 @@ Use polymorphic association: `System belongs_to :mode_detail, polymorphic: true`
 - Screenshots for UI changes
 - Squash merge to keep main clean
 - **IMPORTANT**: Always stop and ask for user confirmation before creating a PR
+- **After creating PR**: Check for blocked tickets in the same epic and update any that can now move to "ready" state
 
 ---
 
@@ -477,6 +478,7 @@ When helping with this project:
 9. **Keep it simple** - KISS principle, don't over-engineer
 10. **Document decisions** - Update docs for significant changes
 11. **STOP before PRs** - Always ask for user confirmation before creating pull requests
+12. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
 
 ---
 
