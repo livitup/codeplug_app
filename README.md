@@ -79,6 +79,15 @@ yarn install
 bin/rails db:setup
 ```
 
+**Seed User Credentials (Development):**
+- Email: `dev@example.com`
+- Password: `password123`
+
+The seed data creates:
+- 1 development user account
+- 10 radio manufacturers
+- 10 realistic radio models with specifications
+
 ### 5. Start Development Server
 
 ```bash
