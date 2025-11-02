@@ -23,6 +23,8 @@
   </head>
 
   <body>
+    <%= render "shared/navbar" %>
+
     <% if flash[:notice] %>
       <div class="alert alert-success alert-dismissible fade show m-3 text-center" role="alert">
         <%= flash[:notice] %>

@@ -1,0 +1,181 @@
+<div class="container mt-4">
+  <h1>Help & Documentation</h1>
+
+  <div class="row mt-4">
+    <div class="col-lg-8">
+      <!-- Overview -->
+      <section class="mb-5">
+        <h2>Overview</h2>
+        <p class="lead">
+          Codeplug App helps you manage radio programming data (codeplugs) in a universal format,
+          then export it to CSV files compatible with different radio programming software.
+        </p>
+      </section>
+
+      <!-- Getting Started -->
+      <section class="mb-5">
+        <h2>Getting Started</h2>
+        <ol class="list-group list-group-numbered">
+          <li class="list-group-item">
+            <strong>Create an Account:</strong> Sign up with your email address and callsign
+          </li>
+          <li class="list-group-item">
+            <strong>Browse Radio Models:</strong> View supported radio models and their specifications
+          </li>
+          <li class="list-group-item">
+            <strong>Create Your Codeplug:</strong> Define channels, zones, and systems
+          </li>
+          <li class="list-group-item">
+            <strong>Export:</strong> Generate CSV files for your specific radio model
+          </li>
+          <li class="list-group-item">
+            <strong>Program Your Radio:</strong> Import the CSV into your radio's programming software
+          </li>
+        </ol>
+      </section>
+
+      <!-- FAQ -->
+      <section class="mb-5">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="accordion" id="faqAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                What is a codeplug?
+              </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                A codeplug is the complete programming configuration for a two-way radio, including channels,
+                zones, talkgroups, and system settings. Different radio manufacturers use different formats
+                and terminology, but Codeplug App provides a universal way to manage this data.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                What radio models are supported?
+              </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                We support dozens of radio models from manufacturers including Motorola, Baofeng, Anytone,
+                TYT, Kenwood, Icom, Yaesu, and more. You can browse the full list of supported models in the
+                Radio Models section. Users can also create custom export layouts for unsupported radios.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                What modes are supported?
+              </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Codeplug App supports analog FM, DMR (Digital Mobile Radio), P25 (Project 25), and NXDN modes.
+                Each mode has specific settings like CTCSS/DCS tones for analog, color codes for DMR, and NAC for P25.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                How do zones work?
+              </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Zones are logical groupings of channels. In Codeplug App, zones can contain unlimited channels.
+                When exporting to a specific radio, if your zone exceeds the radio's capacity, the app will
+                help you split it into multiple zones that fit your radio's limitations.
+              </div>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                Can I share my codeplugs?
+              </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                Yes! Codeplugs can be marked as public or private. Public codeplugs can be discovered and used
+                by other users in your area, making it easy to share repeater and talkgroup configurations with
+                your local ham radio community.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Concepts -->
+      <section class="mb-5">
+        <h2>Key Concepts</h2>
+
+        <h4 class="mt-3">Channels</h4>
+        <p>
+          A channel is your complete configuration for accessing a specific system (repeater or simplex frequency).
+          It includes frequency, mode, power level, bandwidth, and mode-specific settings.
+        </p>
+
+        <h4 class="mt-3">Systems</h4>
+        <p>
+          A system represents a repeater or simplex frequency with its technical specifications. Systems are
+          shared across the community, so you can reference existing repeater configurations.
+        </p>
+
+        <h4 class="mt-3">Talkgroups</h4>
+        <p>
+          For digital modes (DMR, P25), talkgroups organize conversations by topic or region. The app maintains
+          a database of talkgroups organized by networks like Brandmeister, TGIF, and regional systems.
+        </p>
+
+        <h4 class="mt-3">Radio Models</h4>
+        <p>
+          Each radio model has specific capabilities and limitations (maximum zones, channels per zone, name lengths,
+          supported modes). The app uses these specifications to ensure your exports are compatible.
+        </p>
+      </section>
+
+      <!-- Need More Help -->
+      <section class="mb-5">
+        <div class="alert alert-info">
+          <h5>Need More Help?</h5>
+          <p class="mb-0">
+            If you have questions not answered here, please visit our
+            <a href="https://github.com/livitup/codeplug_app/discussions" class="alert-link" target="_blank">GitHub Discussions</a>
+            or report an issue on our
+            <a href="https://github.com/livitup/codeplug_app/issues" class="alert-link" target="_blank">GitHub Issues</a> page.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Quick Links</h5>
+          <ul class="list-unstyled">
+            <% if logged_in? %>
+              <li class="mb-2"><%= link_to "Radio Models", radio_models_path %></li>
+              <li class="mb-2"><%= link_to "My Profile", user_path(current_user) %></li>
+            <% else %>
+              <li class="mb-2"><%= link_to "Sign Up", new_user_path %></li>
+              <li class="mb-2"><%= link_to "Log In", login_path %></li>
+            <% end %>
+            <li class="mb-2"><%= link_to "About", about_path %></li>
+            <li class="mb-2"><%= link_to "Home", root_path %></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
