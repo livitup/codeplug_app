@@ -42,11 +42,11 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
       name: "Brandmeister",
       description: "Worldwide DMR network",
       website: "https://brandmeister.network",
-      network_type: "DMR")
+      network_type: "Digital-DMR")
     get network_path(network)
     assert_select "dd", "Worldwide DMR network"
     assert_select "a[href='https://brandmeister.network']", "https://brandmeister.network"
-    assert_select "dd", "DMR"
+    assert_select "dd", "Digital-DMR"
   end
 
   # New Tests
@@ -79,7 +79,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
           name: "Full Network",
           description: "A complete network",
           website: "https://example.com",
-          network_type: "P25"
+          network_type: "Digital-P25"
         }
       }
     end
@@ -87,7 +87,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Full Network", network.name
     assert_equal "A complete network", network.description
     assert_equal "https://example.com", network.website
-    assert_equal "P25", network.network_type
+    assert_equal "Digital-P25", network.network_type
   end
 
   test "should not create network with invalid attributes" do
@@ -143,7 +143,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
         name: "Updated Network",
         description: "Updated description",
         website: "https://updated.com",
-        network_type: "NXDN"
+        network_type: "analog"
       }
     }
     assert_redirected_to network_path(@network)
@@ -151,7 +151,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Network", @network.name
     assert_equal "Updated description", @network.description
     assert_equal "https://updated.com", @network.website
-    assert_equal "NXDN", @network.network_type
+    assert_equal "analog", @network.network_type
   end
 
   test "should not update network with invalid attributes" do

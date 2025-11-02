@@ -18,8 +18,11 @@
 
   <div class="mb-3">
     <%= f.label :network_type, "Type", class: "form-label" %>
-    <%= f.text_field :network_type, class: "form-control", placeholder: "e.g., DMR, P25, NXDN" %>
-    <div class="form-text">The type of network (DMR, P25, NXDN, etc.)</div>
+    <%= f.select :network_type,
+        Network::NETWORK_TYPES,
+        { include_blank: "Select a type (optional)" },
+        { class: "form-select" } %>
+    <div class="form-text">The type of network</div>
   </div>
 
   <div class="mb-3">

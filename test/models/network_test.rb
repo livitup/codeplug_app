@@ -37,9 +37,28 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with website"
   end
 
-  test "should save network with network_type" do
-    network = build(:network, network_type: "DMR")
-    assert network.save, "Failed to save network with network_type"
+  test "should save network with network_type analog" do
+    network = build(:network, network_type: "analog")
+    assert network.save, "Failed to save network with analog network_type"
+    assert_equal "analog", network.network_type
+  end
+
+  test "should save network with network_type Digital-DMR" do
+    network = build(:network, network_type: "Digital-DMR")
+    assert network.save, "Failed to save network with Digital-DMR network_type"
+    assert_equal "Digital-DMR", network.network_type
+  end
+
+  test "should save network with network_type Digital-P25" do
+    network = build(:network, network_type: "Digital-P25")
+    assert network.save, "Failed to save network with Digital-P25 network_type"
+    assert_equal "Digital-P25", network.network_type
+  end
+
+  test "should not save network with invalid network_type" do
+    network = build(:network, network_type: "invalid_type")
+    assert_not network.save, "Saved network with invalid network_type"
+    assert_includes network.errors[:network_type], "invalid_type is not a valid network type"
   end
 
   test "should allow nil description" do
