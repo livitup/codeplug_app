@@ -82,4 +82,39 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     get login_path
     assert_redirected_to radio_models_path
   end
+
+  test "should redirect to originally requested page after login" do
+    user = create(:user)
+
+    # Try to access a protected page
+    get edit_user_path(user)
+    assert_redirected_to login_path
+
+    # Log in
+    post login_path, params: {
+      email: user.email,
+      password: "password123"
+    }
+
+    # Should redirect back to the originally requested page
+    assert_redirected_to edit_user_path(user)
+    assert_equal "Logged in successfully!", flash[:notice]
+  end
+
+  test "should not redirect to login path after login" do
+    user = create(:user)
+
+    # Manually set return_to to login_path (simulating edge case)
+    get login_path
+    session[:return_to] = login_path
+
+    # Log in
+    post login_path, params: {
+      email: user.email,
+      password: "password123"
+    }
+
+    # Should redirect to default (radio_models_path), not login_path
+    assert_redirected_to radio_models_path
+  end
 end

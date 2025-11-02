@@ -30,9 +30,23 @@ module Authentication
   # Confirms a logged-in user (before_action filter)
   def require_login
     unless logged_in?
+      store_return_to_location
       flash[:alert] = "You must be logged in to access this page."
       redirect_to login_path
     end
+  end
+
+  # Store the URL the user was trying to access
+  def store_return_to_location
+    # Don't store login/logout paths to avoid redirect loops
+    return if request.path == login_path || request.path == logout_path
+
+    session[:return_to] = request.fullpath
+  end
+
+  # Redirect to stored location or default
+  def redirect_back_or_to(default)
+    redirect_to(session.delete(:return_to) || default)
   end
 
   # Confirms the correct user (for authorization)

@@ -12,7 +12,7 @@ class SessionsController < ApplicationController
     if user&.authenticate(params[:password])
       log_in(user)
       flash[:notice] = "Logged in successfully!"
-      redirect_to radio_models_path
+      redirect_back_or_to radio_models_path
     else
       flash.now[:alert] = "Invalid email or password"
       render :new, status: :unprocessable_entity
