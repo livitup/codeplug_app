@@ -26,6 +26,9 @@ Rails.application.routes.draw do
   resources :networks
   resources :talk_groups
 
+  # Systems and infrastructure
+  resources :systems
+
   # Static pages
   get "help", to: "pages#help"
   get "about", to: "pages#about"

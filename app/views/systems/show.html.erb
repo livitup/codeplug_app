@@ -1,0 +1,74 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @system.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_system_path(@system), class: "btn btn-secondary me-1" %>
+      <%= button_to "Delete", system_path(@system), method: :delete,
+          class: "btn btn-danger me-1",
+          form: { class: "d-inline" },
+          data: { confirm: "Are you sure?" } %>
+      <%= link_to "Back", systems_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">System Details</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Name:</dt>
+        <dd class="col-sm-9"><%= @system.name %></dd>
+
+        <dt class="col-sm-3">Mode:</dt>
+        <dd class="col-sm-9"><span class="badge bg-secondary"><%= @system.mode.upcase %></span></dd>
+
+        <dt class="col-sm-3">TX Frequency:</dt>
+        <dd class="col-sm-9"><%= number_with_precision(@system.tx_frequency, precision: 4) %> MHz</dd>
+
+        <dt class="col-sm-3">RX Frequency:</dt>
+        <dd class="col-sm-9"><%= number_with_precision(@system.rx_frequency, precision: 4) %> MHz</dd>
+
+        <% if @system.bandwidth.present? %>
+          <dt class="col-sm-3">Bandwidth:</dt>
+          <dd class="col-sm-9"><%= @system.bandwidth %></dd>
+        <% end %>
+
+        <dt class="col-sm-3">TX Tone Support:</dt>
+        <dd class="col-sm-9"><%= @system.supports_tx_tone ? "Yes" : "No" %></dd>
+
+        <% if @system.supports_tx_tone && @system.tx_tone_value.present? %>
+          <dt class="col-sm-3">TX Tone Value:</dt>
+          <dd class="col-sm-9"><%= @system.tx_tone_value %></dd>
+        <% end %>
+
+        <dt class="col-sm-3">RX Tone Support:</dt>
+        <dd class="col-sm-9"><%= @system.supports_rx_tone ? "Yes" : "No" %></dd>
+
+        <% if @system.supports_rx_tone && @system.rx_tone_value.present? %>
+          <dt class="col-sm-3">RX Tone Value:</dt>
+          <dd class="col-sm-9"><%= @system.rx_tone_value %></dd>
+        <% end %>
+
+        <% if @system.city.present? || @system.state.present? %>
+          <dt class="col-sm-3">Location:</dt>
+          <dd class="col-sm-9"><%= [ @system.city, @system.state, @system.county ].compact.join(", ") %></dd>
+        <% end %>
+
+        <% if @system.latitude.present? && @system.longitude.present? %>
+          <dt class="col-sm-3">Coordinates:</dt>
+          <dd class="col-sm-9"><%= number_with_precision(@system.latitude, precision: 6) %>, <%= number_with_precision(@system.longitude, precision: 6) %></dd>
+        <% end %>
+
+        <dt class="col-sm-3">Mode Details:</dt>
+        <dd class="col-sm-9">
+          <% if @system.mode_detail_type == "DmrModeDetail" %>
+            DMR Color Code: <%= @system.mode_detail.color_code %>
+          <% elsif @system.mode_detail_type == "P25ModeDetail" %>
+            P25 NAC: <%= @system.mode_detail.nac %>
+          <% elsif @system.mode_detail_type == "AnalogModeDetail" %>
+            Analog (basic)
+          <% end %>
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
