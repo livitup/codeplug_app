@@ -35,13 +35,13 @@ This project **strictly follows Test-Driven Development (TDD)** principles:
 ### Absolute Rules
 - **NO code without tests first**
 - **NO PRs with failing tests** - even if failures are unrelated to your changes
-- **ALL tests must pass** before any PR creation (`rails test:all`, `rubocop`, `brakeman`)
+- **ALL tests must pass** before any PR creation (`rails test:all`, `rubocop -a`, `brakeman`)
 - **Red-Green-Refactor** workflow is mandatory
 
 ### Before Every PR
 ```bash
 rails test:all   # All unit, integration, and system tests must pass
-rubocop          # No style violations
+rubocop -a       # Auto-fix and check style violations
 brakeman         # No security issues
 ```
 
@@ -449,8 +449,7 @@ rails test path/to/test.rb # Single test file
 
 ### Code Quality
 ```bash
-rubocop                    # Check style
-rubocop -a                 # Auto-fix
+rubocop -a                 # Auto-fix and check style
 brakeman                   # Security scan
 ```
 
@@ -505,7 +504,7 @@ When helping with this project:
 
 ## Quick Reference
 
-**Test Command**: `rails test:all && rubocop && brakeman`
+**Test Command**: `rails test:all && rubocop -a && brakeman`
 
 **Start Dev**: `bin/dev`
 
