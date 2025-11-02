@@ -172,6 +172,48 @@ Test business logic:
 
 ---
 
+## Seed Data for Development
+
+### Purpose
+Seed data (`db/seeds.rb`) provides realistic test data for development environments, making it easy to develop and test features without manually creating records.
+
+### Requirements for All Models
+When implementing new models, **always add seed data** to `db/seeds.rb`:
+
+- **User**: Create at least one seed user with documented credentials
+- **Lookup/Reference Data**: Create comprehensive seed data (manufacturers, networks, etc.)
+- **Realistic Data**: Use realistic values that represent actual use cases
+- **Idempotent**: Use `find_or_create_by` so seeds can be run multiple times
+- **Environment-specific**: Only run in development (`if Rails.env.development?`)
+- **Helpful Output**: Add messages (e.g., "Created 7 manufacturers...")
+
+### Seed User Credentials
+Document seed user credentials in README.md so developers know how to log in:
+- Email: `dev@example.com`
+- Password: `password123`
+
+### Example
+```ruby
+if Rails.env.development?
+  # Create seed user
+  user = User.find_or_create_by!(email: 'dev@example.com') do |u|
+    u.password = 'password123'
+    u.password_confirmation = 'password123'
+    u.name = 'Dev User'
+    u.callsign = 'W1DEV'
+  end
+  puts "Created seed user: #{user.email}"
+
+  # Create manufacturers
+  manufacturers = ['Motorola', 'Baofeng', 'Anytone'].map do |name|
+    Manufacturer.find_or_create_by!(name: name)
+  end
+  puts "Created #{manufacturers.count} manufacturers"
+end
+```
+
+---
+
 ## Important Business Logic
 
 ### Polymorphic Mode Details
@@ -479,8 +521,9 @@ When helping with this project:
 9. **Security first** - Validate input, check authorization
 10. **Keep it simple** - KISS principle, don't over-engineer
 11. **Document decisions** - Update docs for significant changes
-12. **STOP before PRs** - Always ask for user confirmation before creating pull requests
-13. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
+12. **Create seed data** - When implementing new models, add realistic seed data to `db/seeds.rb` for development
+13. **STOP before PRs** - Always ask for user confirmation before creating pull requests
+14. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
 
 ---
 
