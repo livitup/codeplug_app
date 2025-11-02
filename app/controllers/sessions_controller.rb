@@ -1,6 +1,5 @@
 class SessionsController < ApplicationController
-  include Authentication
-
+  skip_before_action :require_login, only: [ :new, :create ]
   before_action :redirect_if_logged_in, only: [ :new, :create ]
 
   def new
