@@ -30,8 +30,21 @@ class NavbarTest < ApplicationSystemTestCase
     end
   end
 
-  test "navbar has Hardware dropdown with model links" do
+  test "navbar hides Hardware dropdown when not authenticated" do
     visit root_path
+
+    within "nav.navbar" do
+      assert_no_selector "a.dropdown-toggle", text: "Hardware"
+    end
+  end
+
+  test "navbar shows Hardware dropdown when authenticated" do
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
 
     within "nav.navbar" do
       # Find the Hardware dropdown
