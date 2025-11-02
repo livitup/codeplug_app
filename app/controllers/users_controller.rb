@@ -1,7 +1,5 @@
 class UsersController < ApplicationController
-  include Authentication
-
-  before_action :require_login, only: [ :show, :edit, :update ]
+  skip_before_action :require_login, only: [ :new, :create ]
   before_action :set_user, only: [ :show, :edit, :update ]
   before_action :require_correct_user_access, only: [ :edit, :update ]
 

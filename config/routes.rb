@@ -17,6 +17,9 @@ Rails.application.routes.draw do
   # User registration and profile routes
   resources :users, only: [ :new, :create, :show, :edit, :update ]
 
+  # Radio hardware management
+  resources :radio_models
+
   # Defines the root path route ("/")
   root "sessions#new"
 end

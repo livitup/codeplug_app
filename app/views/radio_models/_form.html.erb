@@ -1,0 +1,75 @@
+<%= form_with model: radio_model do |f| %>
+  <% if radio_model.errors.any? %>
+    <div class="alert alert-danger">
+      <h5><%= pluralize(radio_model.errors.count, "error") %> prohibited this radio model from being saved:</h5>
+      <ul>
+        <% radio_model.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :manufacturer_id, class: "form-label" %>
+    <%= f.collection_select :manufacturer_id, @manufacturers, :id, :name,
+        { prompt: "Select manufacturer" }, class: "form-select" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :name, class: "form-label" %>
+    <%= f.text_field :name, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :supported_modes, "Supported Modes (select all that apply)", class: "form-label" %>
+    <%= f.collection_check_boxes :supported_modes, [["Analog", "analog"], ["DMR", "dmr"], ["P25", "p25"], ["NXDN", "nxdn"]], :last, :first do |b| %>
+      <div class="form-check">
+        <%= b.check_box class: "form-check-input" %>
+        <%= b.label class: "form-check-label" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <%= f.label :max_zones, class: "form-label" %>
+      <%= f.number_field :max_zones, class: "form-control" %>
+      <small class="form-text text-muted">Leave blank for unlimited</small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <%= f.label :max_channels_per_zone, class: "form-label" %>
+      <%= f.number_field :max_channels_per_zone, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <%= f.label :long_channel_name_length, class: "form-label" %>
+      <%= f.number_field :long_channel_name_length, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <%= f.label :short_channel_name_length, class: "form-label" %>
+      <%= f.number_field :short_channel_name_length, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <%= f.label :long_zone_name_length, class: "form-label" %>
+      <%= f.number_field :long_zone_name_length, class: "form-control" %>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <%= f.label :short_zone_name_length, class: "form-label" %>
+      <%= f.number_field :short_zone_name_length, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= f.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", radio_models_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>
