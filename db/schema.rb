@@ -60,6 +60,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
     t.datetime "updated_at", null: false
   end
 
+
   create_table "radio_models", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "frequency_ranges"
