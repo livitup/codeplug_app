@@ -37,9 +37,28 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with website"
   end
 
-  test "should save network with network_type" do
-    network = build(:network, network_type: "DMR")
-    assert network.save, "Failed to save network with network_type"
+  test "should save network with network_type Analog" do
+    network = build(:network, network_type: "Analog")
+    assert network.save, "Failed to save network with Analog network_type"
+    assert_equal "Analog", network.network_type
+  end
+
+  test "should save network with network_type Digital-DMR" do
+    network = build(:network, network_type: "Digital-DMR")
+    assert network.save, "Failed to save network with Digital-DMR network_type"
+    assert_equal "Digital-DMR", network.network_type
+  end
+
+  test "should save network with network_type Digital-P25" do
+    network = build(:network, network_type: "Digital-P25")
+    assert network.save, "Failed to save network with Digital-P25 network_type"
+    assert_equal "Digital-P25", network.network_type
+  end
+
+  test "should not save network with invalid network_type" do
+    network = build(:network, network_type: "invalid_type")
+    assert_not network.save, "Saved network with invalid network_type"
+    assert_includes network.errors[:network_type], "invalid_type is not a valid network type"
   end
 
   test "should allow nil description" do
@@ -52,9 +71,38 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with nil website"
   end
 
-  test "should allow nil network_type" do
+  test "should not save network without network_type" do
     network = build(:network, network_type: nil)
-    assert network.save, "Failed to save network with nil network_type"
+    assert_not network.save, "Saved network without network_type"
+    assert_includes network.errors[:network_type], "can't be blank"
+  end
+
+  # Website URL Validation Tests
+  test "should save network with valid http URL" do
+    network = build(:network, website: "http://example.com")
+    assert network.save, "Failed to save network with valid http URL"
+  end
+
+  test "should save network with valid https URL" do
+    network = build(:network, website: "https://example.com")
+    assert network.save, "Failed to save network with valid https URL"
+  end
+
+  test "should not save network with invalid URL format" do
+    network = build(:network, website: "not-a-url")
+    assert_not network.save, "Saved network with invalid URL format"
+    assert_includes network.errors[:website], "must be a valid HTTP or HTTPS URL"
+  end
+
+  test "should not save network with javascript protocol URL" do
+    network = build(:network, website: "javascript:alert('xss')")
+    assert_not network.save, "Saved network with javascript protocol URL"
+    assert_includes network.errors[:website], "must be a valid HTTP or HTTPS URL"
+  end
+
+  test "should allow blank website" do
+    network = build(:network, website: "")
+    assert network.save, "Failed to save network with blank website"
   end
 
   # Association Tests

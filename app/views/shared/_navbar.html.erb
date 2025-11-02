@@ -31,6 +31,9 @@
           <li class="nav-item">
             <%= link_to "Codeplug Layouts", codeplug_layouts_path, class: "nav-link #{request.path.start_with?('/codeplug_layouts') ? 'active' : ''}" %>
           </li>
+          <li class="nav-item">
+            <%= link_to "Networks", networks_path, class: "nav-link #{request.path.start_with?('/networks') ? 'active' : ''}" %>
+          </li>
         <% end %>
       </ul>
 

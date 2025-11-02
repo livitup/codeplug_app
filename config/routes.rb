@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   resources :radio_models
   resources :codeplug_layouts
 
+  # Networks and talkgroups
+  resources :networks
+
   # Static pages
   get "help", to: "pages#help"
   get "about", to: "pages#about"
