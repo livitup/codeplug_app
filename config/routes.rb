@@ -24,6 +24,7 @@ Rails.application.routes.draw do
 
   # Networks and talkgroups
   resources :networks
+  resources :talk_groups
 
   # Static pages
   get "help", to: "pages#help"

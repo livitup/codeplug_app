@@ -34,6 +34,9 @@
           <li class="nav-item">
             <%= link_to "Networks", networks_path, class: "nav-link #{request.path.start_with?('/networks') ? 'active' : ''}" %>
           </li>
+          <li class="nav-item">
+            <%= link_to "TalkGroups", talk_groups_path, class: "nav-link #{request.path.start_with?('/talk_groups') ? 'active' : ''}" %>
+          </li>
         <% end %>
       </ul>
 
