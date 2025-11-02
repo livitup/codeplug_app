@@ -1,8 +1,7 @@
 class RadioModel < ApplicationRecord
   # Associations
   belongs_to :manufacturer
-  # TODO: Uncomment when CodeplugLayout model is implemented
-  # has_many :codeplug_layouts, dependent: :restrict_with_error
+  has_many :codeplug_layouts, dependent: :restrict_with_error
 
   # Serialization
   serialize :supported_modes, type: Array, coder: JSON
