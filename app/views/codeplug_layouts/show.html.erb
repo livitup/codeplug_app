@@ -1,0 +1,77 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @codeplug_layout.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_codeplug_layout_path(@codeplug_layout), class: "btn btn-secondary me-1" %>
+      <%= button_to "Delete", codeplug_layout_path(@codeplug_layout), method: :delete,
+          class: "btn btn-danger me-1",
+          form: { class: "d-inline" },
+          data: { confirm: "Are you sure?" } %>
+      <%= link_to "Back", codeplug_layouts_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Layout Details</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Name:</dt>
+        <dd class="col-sm-9"><%= @codeplug_layout.name %></dd>
+
+        <dt class="col-sm-3">Radio Model:</dt>
+        <dd class="col-sm-9">
+          <%= link_to @codeplug_layout.radio_model.name, radio_model_path(@codeplug_layout.radio_model) %>
+          (<%= @codeplug_layout.radio_model.manufacturer.name %>)
+        </dd>
+
+        <dt class="col-sm-3">Created By:</dt>
+        <dd class="col-sm-9">
+          <% if @codeplug_layout.user %>
+            <%= link_to @codeplug_layout.user.email, user_path(@codeplug_layout.user) %>
+          <% else %>
+            <span class="badge bg-primary">System Default</span>
+          <% end %>
+        </dd>
+
+        <dt class="col-sm-3">Created:</dt>
+        <dd class="col-sm-9"><%= @codeplug_layout.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+
+        <dt class="col-sm-3">Last Updated:</dt>
+        <dd class="col-sm-9"><%= @codeplug_layout.updated_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Layout Definition</h5>
+    </div>
+    <div class="card-body">
+      <% if @codeplug_layout.layout_definition && @codeplug_layout.layout_definition["columns"] %>
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Column Header</th>
+                <th>Maps To</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @codeplug_layout.layout_definition["columns"].each do |column| %>
+                <tr>
+                  <td><code><%= column["header"] %></code></td>
+                  <td><code><%= column["maps_to"] %></code></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <h6 class="mt-3">Raw JSON</h6>
+        <pre class="bg-light p-3 rounded"><code><%= JSON.pretty_generate(@codeplug_layout.layout_definition) %></code></pre>
+      <% else %>
+        <p class="text-muted">No layout definition available.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
