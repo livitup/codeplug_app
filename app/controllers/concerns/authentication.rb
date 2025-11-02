@@ -45,6 +45,6 @@ module Authentication
 
   # Redirect if already logged in
   def redirect_if_logged_in
-    redirect_to root_path if logged_in?
+    redirect_to radio_models_path if logged_in?
   end
 end
