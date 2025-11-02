@@ -65,6 +65,33 @@ class NavbarTest < ApplicationSystemTestCase
     end
   end
 
+  test "navbar Hardware dropdown includes Manufacturers link" do
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within "nav.navbar" do
+      # Find the Hardware dropdown
+      assert_selector "a.dropdown-toggle", text: "Hardware"
+
+      # Click to open dropdown
+      find("a.dropdown-toggle", text: "Hardware").click
+
+      # Check for Manufacturers link (should appear before Radio Models)
+      assert_link "Manufacturers"
+      assert_link "Radio Models"
+
+      # Verify order: Manufacturers should come before Radio Models
+      dropdown_links = all(".dropdown-menu a").map(&:text)
+      manufacturers_index = dropdown_links.index("Manufacturers")
+      radio_models_index = dropdown_links.index("Radio Models")
+      assert manufacturers_index < radio_models_index, "Manufacturers should appear before Radio Models"
+    end
+  end
+
   test "navbar Hardware dropdown links work" do
     user = create(:user, email: "test@example.com", password: "password123")
 
@@ -80,6 +107,23 @@ class NavbarTest < ApplicationSystemTestCase
     end
 
     assert_current_path radio_models_path
+  end
+
+  test "navbar Manufacturers link works" do
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    # Log in first since manufacturers requires authentication
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within "nav.navbar" do
+      find("a.dropdown-toggle", text: "Hardware").click
+      click_link "Manufacturers"
+    end
+
+    assert_current_path manufacturers_path
   end
 
   test "navbar is sticky and remains visible when scrolling" do
