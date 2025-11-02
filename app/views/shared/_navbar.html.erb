@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
   <div class="container-fluid">
     <%= link_to "Codeplug App", root_path, class: "navbar-brand" %>
 
@@ -18,8 +18,14 @@
           <%= link_to "About", about_path, class: "nav-link #{request.path == about_path ? 'active' : ''}" %>
         </li>
         <% if logged_in? %>
-          <li class="nav-item">
-            <%= link_to "Radio Models", radio_models_path, class: "nav-link #{request.path.start_with?('/radio_models') ? 'active' : ''}" %>
+          <!-- Hardware Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="hardwareDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Hardware
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="hardwareDropdown">
+              <li><%= link_to "Radio Models", radio_models_path, class: "dropdown-item" %></li>
+            </ul>
           </li>
         <% end %>
       </ul>
