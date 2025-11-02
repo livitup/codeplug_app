@@ -32,15 +32,15 @@ FactoryBot.define do
     trait :analog_network do
       name { "Analog Repeater Network" }
       description { "Analog FM repeater network" }
-      network_type { "analog" }
+      network_type { "Analog" }
     end
 
-    # Trait for minimal network
+    # Trait for minimal network (network_type is now required)
     trait :minimal do
       name { "Minimal Network" }
       description { nil }
       website { nil }
-      network_type { nil }
+      network_type { "Analog" }
     end
   end
 end

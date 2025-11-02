@@ -65,7 +65,8 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Network.count", 1) do
       post networks_path, params: {
         network: {
-          name: "Test Network"
+          name: "Test Network",
+          network_type: "Digital-DMR"
         }
       }
     end
@@ -143,7 +144,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
         name: "Updated Network",
         description: "Updated description",
         website: "https://updated.com",
-        network_type: "analog"
+        network_type: "Analog"
       }
     }
     assert_redirected_to network_path(@network)
@@ -151,7 +152,7 @@ class NetworksControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Updated Network", @network.name
     assert_equal "Updated description", @network.description
     assert_equal "https://updated.com", @network.website
-    assert_equal "analog", @network.network_type
+    assert_equal "Analog", @network.network_type
   end
 
   test "should not update network with invalid attributes" do

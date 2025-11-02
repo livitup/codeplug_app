@@ -20,9 +20,9 @@
     <%= f.label :network_type, "Type", class: "form-label" %>
     <%= f.select :network_type,
         Network::NETWORK_TYPES,
-        { include_blank: "Select a type (optional)" },
-        { class: "form-select" } %>
-    <div class="form-text">The type of network</div>
+        { include_blank: "Select a type" },
+        { class: "form-select", required: true } %>
+    <div class="form-text">The type of network (required)</div>
   </div>
 
   <div class="mb-3">

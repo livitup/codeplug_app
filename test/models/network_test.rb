@@ -37,10 +37,10 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with website"
   end
 
-  test "should save network with network_type analog" do
-    network = build(:network, network_type: "analog")
-    assert network.save, "Failed to save network with analog network_type"
-    assert_equal "analog", network.network_type
+  test "should save network with network_type Analog" do
+    network = build(:network, network_type: "Analog")
+    assert network.save, "Failed to save network with Analog network_type"
+    assert_equal "Analog", network.network_type
   end
 
   test "should save network with network_type Digital-DMR" do
@@ -71,9 +71,10 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with nil website"
   end
 
-  test "should allow nil network_type" do
+  test "should not save network without network_type" do
     network = build(:network, network_type: nil)
-    assert network.save, "Failed to save network with nil network_type"
+    assert_not network.save, "Saved network without network_type"
+    assert_includes network.errors[:network_type], "can't be blank"
   end
 
   # Website URL Validation Tests
