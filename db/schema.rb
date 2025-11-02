@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_02_174034) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,7 +60,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
     t.datetime "updated_at", null: false
   end
 
-
   create_table "radio_models", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "frequency_ranges"
@@ -78,6 +77,17 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
     t.index ["manufacturer_id"], name: "index_radio_models_on_manufacturer_id"
   end
 
+  create_table "talk_groups", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.bigint "network_id", null: false
+    t.string "talkgroup_number", null: false
+    t.datetime "updated_at", null: false
+    t.index ["network_id", "talkgroup_number"], name: "index_talk_groups_on_network_id_and_talkgroup_number", unique: true
+    t.index ["network_id"], name: "index_talk_groups_on_network_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "callsign"
     t.datetime "created_at", null: false
@@ -93,4 +103,5 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
   add_foreign_key "radio_models", "manufacturers"
+  add_foreign_key "talk_groups", "networks"
 end
