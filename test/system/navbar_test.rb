@@ -46,7 +46,13 @@ class NavbarTest < ApplicationSystemTestCase
   end
 
   test "navbar Hardware dropdown links work" do
-    visit root_path
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    # Log in first since radio_models requires authentication
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
 
     within "nav.navbar" do
       find("a.dropdown-toggle", text: "Hardware").click
