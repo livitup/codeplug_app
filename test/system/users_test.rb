@@ -29,42 +29,23 @@ class UsersTest < ApplicationSystemTestCase
     assert_link "Sign up"
   end
 
-  test "profile page displays user information" do
-    user = create(:user, name: "Test User", callsign: "W1ABC", email: "test@example.com")
-
-    # For system tests, we need to manually set the session
-    # This is simpler than going through the login form with Turbo
-    visit login_path
-    fill_in "Email", with: user.email
-    fill_in "Password", with: "password123"
-    click_on "Log In"
+  test "unauthenticated user redirected from profile page" do
+    user = create(:user, name: "Test User", callsign: "W1ABC")
 
     visit user_path(user)
 
-    assert_text "User Profile"
-    assert_text user.email
-    assert_text user.name
-    assert_text user.callsign
-    assert_link "Edit Profile"
+    # Should be redirected to login with flash message
+    assert_text "You must be logged in to access this page"
+    assert_current_path login_path
   end
 
-  test "edit profile form displays correctly" do
+  test "unauthenticated user redirected from edit profile page" do
     user = create(:user)
-
-    # Log in
-    visit login_path
-    fill_in "Email", with: user.email
-    fill_in "Password", with: "password123"
-    click_on "Log In"
 
     visit edit_user_path(user)
 
-    assert_text "Edit Profile"
-    assert_selector "input[name='user[email]'][value='#{user.email}']"
-    assert_selector "input[name='user[name]']"
-    assert_selector "input[name='user[callsign]']"
-    assert_selector "select[name='user[default_power_level]']"
-    assert_button "Update Profile"
-    assert_link "Cancel"
+    # Should be redirected to login with flash message
+    assert_text "You must be logged in to access this page"
+    assert_current_path login_path
   end
 end
