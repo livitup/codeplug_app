@@ -9,4 +9,8 @@ class Network < ApplicationRecord
 
   # Validations
   validates :name, presence: true, uniqueness: { case_sensitive: false }
+  validates :website, format: {
+    with: URI::DEFAULT_PARSER.make_regexp(%w[http https]),
+    message: "must be a valid HTTP or HTTPS URL"
+  }, allow_blank: true
 end

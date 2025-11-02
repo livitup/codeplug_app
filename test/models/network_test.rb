@@ -57,6 +57,34 @@ class NetworkTest < ActiveSupport::TestCase
     assert network.save, "Failed to save network with nil network_type"
   end
 
+  # Website URL Validation Tests
+  test "should save network with valid http URL" do
+    network = build(:network, website: "http://example.com")
+    assert network.save, "Failed to save network with valid http URL"
+  end
+
+  test "should save network with valid https URL" do
+    network = build(:network, website: "https://example.com")
+    assert network.save, "Failed to save network with valid https URL"
+  end
+
+  test "should not save network with invalid URL format" do
+    network = build(:network, website: "not-a-url")
+    assert_not network.save, "Saved network with invalid URL format"
+    assert_includes network.errors[:website], "must be a valid HTTP or HTTPS URL"
+  end
+
+  test "should not save network with javascript protocol URL" do
+    network = build(:network, website: "javascript:alert('xss')")
+    assert_not network.save, "Saved network with javascript protocol URL"
+    assert_includes network.errors[:website], "must be a valid HTTP or HTTPS URL"
+  end
+
+  test "should allow blank website" do
+    network = build(:network, website: "")
+    assert network.save, "Failed to save network with blank website"
+  end
+
   # Association Tests
   # TODO: Uncomment when TalkGroup model is implemented
   # test "should respond to talkgroups association" do

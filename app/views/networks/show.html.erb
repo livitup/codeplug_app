@@ -1,0 +1,40 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @network.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_network_path(@network), class: "btn btn-secondary me-1" %>
+      <%= button_to "Delete", network_path(@network), method: :delete,
+          class: "btn btn-danger me-1",
+          form: { class: "d-inline" },
+          data: { confirm: "Are you sure?" } %>
+      <%= link_to "Back", networks_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Network Details</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Name:</dt>
+        <dd class="col-sm-9"><%= @network.name %></dd>
+
+        <dt class="col-sm-3">Type:</dt>
+        <dd class="col-sm-9"><%= @network.network_type.presence || "Not specified" %></dd>
+
+        <dt class="col-sm-3">Website:</dt>
+        <dd class="col-sm-9">
+          <% if safe_network_website_url(@network).present? %>
+            <%= link_to safe_network_website_url(@network), safe_network_website_url(@network), target: "_blank", rel: "noopener" %>
+          <% else %>
+            Not specified
+          <% end %>
+        </dd>
+
+        <dt class="col-sm-3">Description:</dt>
+        <dd class="col-sm-9"><%= @network.description.presence || "Not specified" %></dd>
+      </dl>
+    </div>
+  </div>
+
+  <%# TODO: Add talkgroups section when TalkGroup model is implemented %>
+</div>
