@@ -2,6 +2,8 @@ require "test_helper"
 
 class RadioModelsControllerTest < ActionDispatch::IntegrationTest
   setup do
+    @user = create(:user)
+    log_in_as(@user)
     @manufacturer = create(:manufacturer)
     @radio_model = create(:radio_model, manufacturer: @manufacturer)
   end
@@ -140,5 +142,15 @@ class RadioModelsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to radio_models_path
     assert_equal "Radio model was successfully deleted.", flash[:notice]
+  end
+
+  private
+
+  # Helper method to simulate user login
+  def log_in_as(user)
+    post login_path, params: {
+      email: user.email,
+      password: "password123"
+    }
   end
 end
