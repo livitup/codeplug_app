@@ -409,6 +409,7 @@ Use polymorphic association: `System belongs_to :mode_detail, polymorphic: true`
 - Feature branches from `main`
 - Naming: `feature/issue-number-brief-description` (e.g., `feature/22-radio-model-views`)
 - **ONE branch per issue ticket** - each GitHub issue gets its own dedicated branch and PR
+- **ALWAYS checkout main and pull before creating a new branch**: `git checkout main && git pull` before `git checkout -b feature/XX-name`
 
 ### Commits
 - Clear, present-tense messages
@@ -513,17 +514,18 @@ When helping with this project:
 1. **Always start with tests** - Write failing test before implementation
 2. **Follow TDD cycle** - Red → Green → Refactor
 3. **One branch per issue** - Each GitHub issue ticket gets its own dedicated branch and PR
-4. **Use Rails conventions** - RESTful routes, skinny controllers, etc.
-5. **Reference docs** - Check `docs/MODELS.md` and `docs/ARCHITECTURE.md`
-6. **Ask clarifying questions** - Domain knowledge (radios) may be unclear
-7. **Consider performance** - N+1 queries, indexes, caching
-8. **Think about UI/UX** - Hotwire for dynamic interactions
-9. **Security first** - Validate input, check authorization
-10. **Keep it simple** - KISS principle, don't over-engineer
-11. **Document decisions** - Update docs for significant changes
-12. **Create seed data** - When implementing new models, add realistic seed data to `db/seeds.rb` for development
-13. **STOP before PRs** - Always ask for user confirmation before creating pull requests
-14. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
+4. **Always start from latest main** - Before creating a new branch: `git checkout main && git pull`
+5. **Use Rails conventions** - RESTful routes, skinny controllers, etc.
+6. **Reference docs** - Check `docs/MODELS.md` and `docs/ARCHITECTURE.md`
+7. **Ask clarifying questions** - Domain knowledge (radios) may be unclear
+8. **Consider performance** - N+1 queries, indexes, caching
+9. **Think about UI/UX** - Hotwire for dynamic interactions
+10. **Security first** - Validate input, check authorization
+11. **Keep it simple** - KISS principle, don't over-engineer
+12. **Document decisions** - Update docs for significant changes
+13. **Create seed data** - When implementing new models, add realistic seed data to `db/seeds.rb` for development
+14. **STOP before PRs** - Always ask for user confirmation before creating pull requests
+15. **After PRs** - Check for blocked tickets in the same epic and update any that can now move to "ready" state
 
 ---
 
