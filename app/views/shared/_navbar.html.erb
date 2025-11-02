@@ -28,6 +28,9 @@
               <li><%= link_to "Radio Models", radio_models_path, class: "dropdown-item" %></li>
             </ul>
           </li>
+          <li class="nav-item">
+            <%= link_to "Codeplug Layouts", codeplug_layouts_path, class: "nav-link #{request.path.start_with?('/codeplug_layouts') ? 'active' : ''}" %>
+          </li>
         <% end %>
       </ul>
 

@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   # Radio hardware management
   resources :manufacturers
   resources :radio_models
+  resources :codeplug_layouts
 
   # Static pages
   get "help", to: "pages#help"
