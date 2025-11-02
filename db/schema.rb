@@ -10,9 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_02_154302) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "analog_mode_details", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "codeplug_layouts", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -24,6 +29,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154302) do
     t.index ["radio_model_id", "name"], name: "index_codeplug_layouts_on_radio_model_id_and_name"
     t.index ["radio_model_id"], name: "index_codeplug_layouts_on_radio_model_id"
     t.index ["user_id"], name: "index_codeplug_layouts_on_user_id"
+  end
+
+  create_table "dmr_mode_details", force: :cascade do |t|
+    t.integer "color_code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "manufacturers", force: :cascade do |t|
@@ -42,6 +53,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_154302) do
     t.string "website"
     t.index ["name"], name: "index_networks_on_name", unique: true
   end
+
+  create_table "p25_mode_details", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "nac", null: false
+    t.datetime "updated_at", null: false
+  end
+
 
   create_table "radio_models", force: :cascade do |t|
     t.datetime "created_at", null: false
