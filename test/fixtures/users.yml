@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: user_one@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  name: User One
+  callsign: W4ABC
+  default_power_level: High
+  measurement_preference: metric
+
+two:
+  email: user_two@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  name: User Two
+  callsign: K4DEF
+  default_power_level: Low
+  measurement_preference: imperial
