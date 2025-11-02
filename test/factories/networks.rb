@@ -1,0 +1,39 @@
+FactoryBot.define do
+  factory :network do
+    sequence(:name) { |n| "Network #{n}" }
+    description { "A digital radio network" }
+    website { "https://example.com" }
+    network_type { "DMR" }
+
+    # Trait for Brandmeister
+    trait :brandmeister do
+      name { "Brandmeister" }
+      description { "Global DMR network" }
+      website { "https://brandmeister.network" }
+      network_type { "DMR" }
+    end
+
+    # Trait for DMRVA
+    trait :dmrva do
+      name { "DMRVA" }
+      description { "DMR network in Virginia" }
+      website { "https://dmrva.net" }
+      network_type { "DMR" }
+    end
+
+    # Trait for P25
+    trait :p25_network do
+      name { "P25 Network" }
+      description { "Project 25 digital network" }
+      network_type { "P25" }
+    end
+
+    # Trait for minimal network
+    trait :minimal do
+      name { "Minimal Network" }
+      description { nil }
+      website { nil }
+      network_type { nil }
+    end
+  end
+end
