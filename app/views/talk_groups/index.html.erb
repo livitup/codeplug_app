@@ -1,0 +1,51 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>TalkGroups</h1>
+    <%= link_to "New TalkGroup", new_talk_group_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if params[:network_id].present? %>
+    <div class="alert alert-info">
+      Showing talkgroups for network: <strong><%= Network.find(params[:network_id]).name %></strong>
+      <%= link_to "Show all talkgroups", talk_groups_path, class: "alert-link ms-2" %>
+    </div>
+  <% end %>
+
+  <% if @talk_groups.any? %>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Network</th>
+            <th>Description</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @talk_groups.each do |talk_group| %>
+            <tr>
+              <td><%= talk_group.talkgroup_number %></td>
+              <td><%= link_to talk_group.name, talk_group_path(talk_group) %></td>
+              <td><%= link_to talk_group.network.name, network_path(talk_group.network) %></td>
+              <td><%= talk_group.description.present? ? truncate(talk_group.description, length: 50) : "" %></td>
+              <td class="text-end">
+                <%= link_to "View", talk_group_path(talk_group), class: "btn btn-sm btn-info me-1" %>
+                <%= link_to "Edit", edit_talk_group_path(talk_group), class: "btn btn-sm btn-secondary me-1" %>
+                <%= button_to "Delete", talk_group_path(talk_group), method: :delete,
+                    class: "btn btn-sm btn-danger",
+                    form: { class: "d-inline" },
+                    data: { confirm: "Are you sure?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      No talkgroups found. <%= link_to "Create the first one", new_talk_group_path, class: "alert-link" %>.
+    </div>
+  <% end %>
+</div>

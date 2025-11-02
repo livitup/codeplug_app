@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @talk_group.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_talk_group_path(@talk_group), class: "btn btn-secondary me-1" %>
+      <%= button_to "Delete", talk_group_path(@talk_group), method: :delete,
+          class: "btn btn-danger me-1",
+          form: { class: "d-inline" },
+          data: { confirm: "Are you sure?" } %>
+      <%= link_to "Back", talk_groups_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">TalkGroup Details</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3">Name:</dt>
+        <dd class="col-sm-9"><%= @talk_group.name %></dd>
+
+        <dt class="col-sm-3">TalkGroup Number:</dt>
+        <dd class="col-sm-9"><%= @talk_group.talkgroup_number %></dd>
+
+        <dt class="col-sm-3">Network:</dt>
+        <dd class="col-sm-9"><%= link_to @talk_group.network.name, network_path(@talk_group.network) %></dd>
+
+        <dt class="col-sm-3">Description:</dt>
+        <dd class="col-sm-9"><%= @talk_group.description.presence || "Not specified" %></dd>
+      </dl>
+    </div>
+  </div>
+</div>

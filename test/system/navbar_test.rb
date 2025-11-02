@@ -163,4 +163,32 @@ class NavbarTest < ApplicationSystemTestCase
 
     assert_current_path networks_path
   end
+
+  test "navbar shows TalkGroups link when authenticated" do
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within "nav.navbar" do
+      assert_link "TalkGroups"
+    end
+  end
+
+  test "navbar TalkGroups link works" do
+    user = create(:user, email: "test@example.com", password: "password123")
+
+    visit login_path
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within "nav.navbar" do
+      click_link "TalkGroups"
+    end
+
+    assert_current_path talk_groups_path
+  end
 end
