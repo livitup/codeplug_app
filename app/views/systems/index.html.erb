@@ -1,0 +1,46 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Systems</h1>
+    <%= link_to "New System", new_system_path, class: "btn btn-primary" %>
+  </div>
+
+  <% if @systems.any? %>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Mode</th>
+            <th>TX Frequency</th>
+            <th>RX Frequency</th>
+            <th>Location</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @systems.each do |system| %>
+            <tr>
+              <td><%= link_to system.name, system_path(system) %></td>
+              <td><span class="badge bg-secondary"><%= system.mode.upcase %></span></td>
+              <td><%= number_with_precision(system.tx_frequency, precision: 4) %></td>
+              <td><%= number_with_precision(system.rx_frequency, precision: 4) %></td>
+              <td><%= [ system.city, system.state ].compact.join(", ").presence || "—" %></td>
+              <td class="text-end">
+                <%= link_to "View", system_path(system), class: "btn btn-sm btn-info me-1" %>
+                <%= link_to "Edit", edit_system_path(system), class: "btn btn-sm btn-secondary me-1" %>
+                <%= button_to "Delete", system_path(system), method: :delete,
+                    class: "btn btn-sm btn-danger",
+                    form: { class: "d-inline" },
+                    data: { confirm: "Are you sure?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      No systems found. <%= link_to "Create the first one", new_system_path, class: "alert-link" %>.
+    </div>
+  <% end %>
+</div>
