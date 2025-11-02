@@ -34,7 +34,7 @@ Generate CSV for: Motorola CPS, Baofeng CHIRP, Kenwood KPG, etc.
 ### Backend
 - **Ruby on Rails 8** - Latest stable version
 - **Ruby 3.x** - Version specified in `.ruby-version`
-- **MariaDB** - Primary database (database-agnostic design, no PostgreSQL dependencies)
+- **PostgreSQL** - Primary database (version 12 or higher recommended)
 - **Solid Queue** - Background jobs (Rails 8 default)
 - **Solid Cache** - Caching (Rails 8 default)
 
@@ -423,10 +423,11 @@ end
 
 **Why:** Many-to-many with additional data (position, timeslot, etc.)
 
-### Database Agnostic
-- No PostgreSQL-specific features (jsonb, array columns, etc.)
-- Use Rails serialization for arrays/JSON
-- Works with MariaDB, MySQL, PostgreSQL, SQLite
+### Database Features
+- Uses PostgreSQL for robust performance and features
+- JSONB columns can be used for flexible data structures where appropriate
+- Array columns available for storing lists
+- Full Rails Active Record support
 
 ---
 

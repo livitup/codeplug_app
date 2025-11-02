@@ -15,7 +15,7 @@ The Codeplug Application serves as a "Rosetta Stone" for radio programming files
 
 ## Architecture
 
-- **Backend**: Ruby on Rails 8 with MariaDB
+- **Backend**: Ruby on Rails 8 with PostgreSQL
 - **Frontend**: Hotwire (Turbo + Stimulus) with Bootstrap 5
 - **Testing**: Minitest with Capybara for system tests
 - **Deployment**: Kamal with Docker
@@ -41,7 +41,7 @@ See [docs/MODELS.md](docs/MODELS.md) for complete data model documentation.
 
 - **Ruby**: See `.ruby-version` (Ruby 3.x)
 - **Node.js**: See `.node-version` (for esbuild)
-- **Database**: MariaDB or MySQL
+- **Database**: PostgreSQL (version 12 or higher recommended)
 - **Bundler**: Latest version
 - **Yarn**: Latest version
 
@@ -67,11 +67,9 @@ yarn install
 ### 3. Configure Database
 
 ```bash
-# Copy sample database configuration
-cp config/database.yml.example config/database.yml
-
-# Edit config/database.yml with your database credentials
-# Default assumes MariaDB/MySQL on localhost
+# Database configuration is already set up for PostgreSQL
+# Edit config/database.yml if you need custom settings
+# Default assumes PostgreSQL on localhost with standard settings
 ```
 
 ### 4. Setup Database
@@ -349,11 +347,15 @@ Closes #123
 
 ```bash
 # Check database is running
-systemctl status mariadb  # or mysql
+# macOS with Homebrew:
+brew services list | grep postgresql
+
+# Linux:
+systemctl status postgresql
 
 # Verify credentials in config/database.yml
 # Test connection manually
-mysql -u username -p database_name
+psql -U postgres -d codeplug_app_development
 ```
 
 ### Asset Compilation Issues

@@ -54,7 +54,7 @@ If ANY test fails (even outside your changes), you MUST fix it before creating t
 ### Backend
 - **Rails 8** - Latest stable with built-in authentication (no Devise)
 - **Ruby 3.x** - Version in `.ruby-version`
-- **MariaDB/MySQL** - Database (no PostgreSQL-specific features)
+- **PostgreSQL** - Database (version 12 or higher recommended)
 - **Solid Queue** - Background jobs (Rails 8 default)
 - **Solid Cache** - Caching (Rails 8 default)
 
