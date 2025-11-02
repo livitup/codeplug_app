@@ -25,10 +25,14 @@
             <td><%= radio_model.max_zones || "Unlimited" %></td>
             <td><%= radio_model.max_channels_per_zone || "N/A" %></td>
             <td>
-              <%= link_to "Edit", edit_radio_model_path(radio_model), class: "btn btn-sm btn-outline-primary" %>
-              <%= button_to "Delete", radio_model_path(radio_model), method: :delete,
-                  class: "btn btn-sm btn-outline-danger",
-                  data: { turbo_confirm: "Are you sure?" } %>
+              <div class="btn-group" role="group">
+                <%= link_to "View", radio_model_path(radio_model), class: "btn btn-sm btn-outline-info" %>
+                <%= link_to "Edit", edit_radio_model_path(radio_model), class: "btn btn-sm btn-outline-primary" %>
+                <%= button_to "Delete", radio_model_path(radio_model), method: :delete,
+                    class: "btn btn-sm btn-outline-danger",
+                    form: { class: "d-inline" },
+                    data: { turbo_confirm: "Are you sure?" } %>
+              </div>
             </td>
           </tr>
         <% end %>
