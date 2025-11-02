@@ -1,0 +1,23 @@
+<%= form_with model: manufacturer do |f| %>
+  <% if manufacturer.errors.any? %>
+    <div class="alert alert-danger">
+      <h5><%= pluralize(manufacturer.errors.count, "error") %> prohibited this manufacturer from being saved:</h5>
+      <ul>
+        <% manufacturer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :name, class: "form-label" %>
+    <%= f.text_field :name, class: "form-control", autofocus: true, required: true %>
+    <div class="form-text">The manufacturer's name (e.g., Motorola, Baofeng, Kenwood)</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= f.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", manufacturer.persisted? ? manufacturer_path(manufacturer) : manufacturers_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>
