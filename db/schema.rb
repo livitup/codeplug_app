@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_02_175353) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_02_232504) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,6 +77,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_175353) do
     t.index ["manufacturer_id"], name: "index_radio_models_on_manufacturer_id"
   end
 
+  create_table "system_networks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "network_id", null: false
+    t.bigint "system_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["network_id"], name: "index_system_networks_on_network_id"
+    t.index ["system_id", "network_id"], name: "index_system_networks_on_system_id_and_network_id", unique: true
+    t.index ["system_id"], name: "index_system_networks_on_system_id"
+  end
+
   create_table "systems", force: :cascade do |t|
     t.string "bandwidth"
     t.string "city"
@@ -127,5 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_175353) do
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
   add_foreign_key "radio_models", "manufacturers"
+  add_foreign_key "system_networks", "networks"
+  add_foreign_key "system_networks", "systems"
   add_foreign_key "talk_groups", "networks"
 end
