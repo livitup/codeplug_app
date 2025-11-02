@@ -122,10 +122,7 @@ rails test:all
 ### Code Quality Checks
 
 ```bash
-# Run RuboCop (style/lint checker)
-rubocop
-
-# Auto-fix simple violations
+# Run RuboCop (auto-fix and check style/lint)
 rubocop -a
 
 # Run Brakeman (security scanner)
@@ -140,8 +137,8 @@ brakeman
 # 1. Run full test suite
 rails test:all
 
-# 2. Check code style
-rubocop
+# 2. Auto-fix and check code style
+rubocop -a
 
 # 3. Check security
 brakeman
@@ -311,7 +308,7 @@ DATABASE_URL=<production database connection string>
 
 1. **Test-Driven Development**: Write tests first, always
 2. **Follow Rails Conventions**: Use Rails idioms and patterns
-3. **Code Style**: Pass RuboCop checks
+3. **Code Style**: Pass RuboCop checks (run with -a to auto-fix)
 4. **Security**: Pass Brakeman checks
 5. **Documentation**: Update docs for significant changes
 
@@ -321,7 +318,7 @@ DATABASE_URL=<production database connection string>
 2. Write failing tests for new feature/fix
 3. Implement feature/fix following TDD
 4. Ensure ALL tests pass (`rails test:all`)
-5. Ensure RuboCop passes (`rubocop`)
+5. Ensure RuboCop passes (`rubocop -a`)
 6. Ensure Brakeman passes (`brakeman`)
 7. Create PR with clear description
 8. Address code review feedback

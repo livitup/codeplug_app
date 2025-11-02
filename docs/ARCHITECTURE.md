@@ -50,7 +50,7 @@ Generate CSV for: Motorola CPS, Baofeng CHIRP, Kenwood KPG, etc.
 - **Selenium/Browser Driver** - For system tests
 
 ### Code Quality
-- **RuboCop** - Ruby linter and style enforcer
+- **RuboCop** - Ruby linter and style enforcer (run with -a to auto-fix)
 - **Brakeman** - Security vulnerability scanner (already in bin/)
 
 ### Deployment
@@ -283,7 +283,7 @@ end
 
 **Pre-PR Requirements:**
 1. All tests must pass (unit, integration, system)
-2. RuboCop violations must be resolved
+2. RuboCop violations must be resolved (run rubocop -a to auto-fix)
 3. Brakeman security scan must pass
 
 **Automated Checks:**
@@ -296,7 +296,7 @@ jobs:
     steps:
       - Run database setup
       - Run rails test (all tests)
-      - Run rubocop
+      - Run rubocop -a
       - Run brakeman
 ```
 
@@ -313,8 +313,8 @@ jobs:
 rails test
 rails test:system
 
-# Check code style
-rubocop
+# Auto-fix and check code style
+rubocop -a
 
 # Check security
 brakeman
@@ -326,7 +326,7 @@ brakeman
 ```bash
 #!/bin/bash
 # .git/hooks/pre-commit
-rails test && rubocop
+rails test && rubocop -a
 ```
 
 ---
@@ -775,7 +775,7 @@ bin/rails test      # Run tests
 ### What to Look For
 - Tests present and passing
 - Follows Rails conventions
-- No RuboCop violations
+- No RuboCop violations (after running rubocop -a)
 - Clear, readable code
 - Proper error handling
 - Security considerations
