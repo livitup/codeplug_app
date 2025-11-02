@@ -10,9 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_02_043923) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_02_154854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "analog_mode_details", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "codeplug_layouts", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -26,11 +31,33 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_02_043923) do
     t.index ["user_id"], name: "index_codeplug_layouts_on_user_id"
   end
 
+  create_table "dmr_mode_details", force: :cascade do |t|
+    t.integer "color_code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "manufacturers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["name"], name: "index_manufacturers_on_name", unique: true
+  end
+
+  create_table "networks", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.string "network_type"
+    t.datetime "updated_at", null: false
+    t.string "website"
+    t.index ["name"], name: "index_networks_on_name", unique: true
+  end
+
+  create_table "p25_mode_details", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "nac", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "radio_models", force: :cascade do |t|
