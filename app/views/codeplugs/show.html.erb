@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @codeplug.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_codeplug_path(@codeplug), class: "btn btn-secondary me-2" %>
+      <%= button_to "Delete", codeplug_path(@codeplug), method: :delete,
+          class: "btn btn-danger",
+          form: { class: "d-inline" },
+          data: { confirm: "Are you sure?" } %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Codeplugs", codeplugs_path, class: "btn btn-secondary mb-3" %>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Codeplug Details</h5>
+
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <strong>Name:</strong> <%= @codeplug.name %>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <strong>Description:</strong> <%= @codeplug.description || "—" %>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <strong>Public:</strong> <%= @codeplug.public ? "Yes" : "No" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Channels</h5>
+        <%= link_to "Manage Channels", codeplug_channels_path(@codeplug), class: "btn btn-primary" %>
+      </div>
+      <p class="text-muted">Configure channels for this codeplug.</p>
+    </div>
+  </div>
+</div>

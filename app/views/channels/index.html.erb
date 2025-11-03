@@ -1,0 +1,48 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Channels - <%= @codeplug.name %></h1>
+    <%= link_to "New Channel", new_codeplug_channel_path(@codeplug), class: "btn btn-primary" %>
+  </div>
+
+  <%= link_to "← Back to Codeplug", codeplug_path(@codeplug), class: "btn btn-secondary mb-3" %>
+
+  <% if @channels.any? %>
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>System</th>
+            <th>Talkgroup</th>
+            <th>Power Level</th>
+            <th>Tone Mode</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @channels.each do |channel| %>
+            <tr>
+              <td><%= link_to channel.name, codeplug_channel_path(@codeplug, channel) %></td>
+              <td><%= channel.system&.name || "—" %></td>
+              <td><%= channel.system_talk_group&.talk_group&.name || "—" %></td>
+              <td><%= channel.power_level || "—" %></td>
+              <td><span class="badge bg-secondary"><%= channel.tone_mode %></span></td>
+              <td class="text-end text-nowrap">
+                <%= link_to "View", codeplug_channel_path(@codeplug, channel), class: "btn btn-sm btn-info me-1" %>
+                <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, channel), class: "btn btn-sm btn-secondary me-1" %>
+                <%= button_to "Delete", codeplug_channel_path(@codeplug, channel), method: :delete,
+                    class: "btn btn-sm btn-danger",
+                    form: { class: "d-inline" },
+                    data: { confirm: "Are you sure?" } %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      No channels found. <%= link_to "Create the first one", new_codeplug_channel_path(@codeplug), class: "alert-link" %>.
+    </div>
+  <% end %>
+</div>

@@ -29,6 +29,11 @@ Rails.application.routes.draw do
   # Systems and infrastructure
   resources :systems
 
+  # Codeplugs and channels (nested)
+  resources :codeplugs do
+    resources :channels
+  end
+
   # Static pages
   get "help", to: "pages#help"
   get "about", to: "pages#about"
