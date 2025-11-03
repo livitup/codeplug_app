@@ -31,10 +31,10 @@ class SystemTest < ActiveSupport::TestCase
     assert_includes system.errors[:rx_frequency], "can't be blank"
   end
 
-  test "should not save system without mode_detail" do
-    system = build(:system, mode_detail: nil)
-    assert_not system.save, "Saved system without mode_detail"
-    assert_includes system.errors[:mode_detail], "must exist"
+  test "should not save DMR system without color_code" do
+    system = build(:system, mode: "dmr", color_code: nil)
+    assert_not system.save, "Saved DMR system without color_code"
+    assert_includes system.errors[:color_code], "is not a number"
   end
 
   # Mode Enum Tests
@@ -49,12 +49,12 @@ class SystemTest < ActiveSupport::TestCase
   end
 
   test "should save system with p25 mode" do
-    system = build(:system, mode: "p25")
+    system = build(:system, :p25)
     assert system.save, "Failed to save system with p25 mode"
   end
 
   test "should save system with nxdn mode" do
-    system = build(:system, mode: "nxdn")
+    system = build(:system, :nxdn)
     assert system.save, "Failed to save system with nxdn mode"
   end
 
@@ -86,10 +86,9 @@ class SystemTest < ActiveSupport::TestCase
   end
 
   test "should work with P25ModeDetail" do
-    p25_detail = create(:p25_mode_detail, nac: "293")
-    system = build(:system, mode: "p25", mode_detail: p25_detail)
+    system = build(:system, :p25)
     assert system.save, "Failed to save system with P25ModeDetail"
-    assert_equal p25_detail, system.mode_detail
+    assert_instance_of P25ModeDetail, system.mode_detail
     assert_equal "P25ModeDetail", system.mode_detail_type
   end
 
