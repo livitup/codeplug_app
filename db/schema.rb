@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_03_005440) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_03_010759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -155,6 +155,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_005440) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "zones", force: :cascade do |t|
+    t.bigint "codeplug_id", null: false
+    t.datetime "created_at", null: false
+    t.string "long_name"
+    t.string "name", null: false
+    t.string "short_name"
+    t.datetime "updated_at", null: false
+    t.index ["codeplug_id"], name: "index_zones_on_codeplug_id"
+  end
+
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
   add_foreign_key "codeplugs", "users"
@@ -164,4 +174,5 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_005440) do
   add_foreign_key "system_talk_groups", "systems"
   add_foreign_key "system_talk_groups", "talk_groups"
   add_foreign_key "talk_groups", "networks"
+  add_foreign_key "zones", "codeplugs"
 end
