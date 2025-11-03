@@ -1,0 +1,11 @@
+<div class="container mt-4">
+  <h1>Edit Channel - <%= @channel.name %></h1>
+
+  <%= link_to "← Back to Channel", codeplug_channel_path(@codeplug, @channel), class: "btn btn-secondary mb-3" %>
+
+  <div class="card">
+    <div class="card-body">
+      <%= render "form", channel: @channel %>
+    </div>
+  </div>
+</div>

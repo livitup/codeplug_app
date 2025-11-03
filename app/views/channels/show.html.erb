@@ -1,0 +1,82 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @channel.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, @channel), class: "btn btn-secondary me-2" %>
+      <%= button_to "Delete", codeplug_channel_path(@codeplug, @channel), method: :delete,
+          class: "btn btn-danger",
+          data: { confirm: "Are you sure?" } %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Channels", codeplug_channels_path(@codeplug), class: "btn btn-secondary mb-3" %>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Channel Details</h5>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <strong>Name:</strong> <%= @channel.name %>
+        </div>
+        <div class="col-md-6">
+          <strong>Long Name:</strong> <%= @channel.long_name || "—" %>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <strong>Short Name:</strong> <%= @channel.short_name || "—" %>
+        </div>
+        <div class="col-md-6">
+          <strong>Power Level:</strong> <%= @channel.power_level || "—" %>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <strong>Bandwidth:</strong> <%= @channel.bandwidth || "—" %>
+        </div>
+        <div class="col-md-6">
+          <strong>Tone Mode:</strong> <span class="badge bg-secondary"><%= @channel.tone_mode %></span>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <strong>Transmit Permission:</strong>
+          <% if @channel.transmit_permission == "allow" %>
+            <span class="badge bg-success">Allowed</span>
+          <% else %>
+            <span class="badge bg-danger">Forbidden</span>
+          <% end %>
+        </div>
+      </div>
+
+      <hr>
+
+      <h5 class="card-title mt-3">System Information</h5>
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <strong>System:</strong>
+          <% if @channel.system %>
+            <%= link_to @channel.system.name, system_path(@channel.system), class: "btn btn-sm btn-outline-primary" %>
+          <% else %>
+            —
+          <% end %>
+        </div>
+      </div>
+
+      <% if @channel.system_talk_group %>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <strong>Talkgroup:</strong> <%= @channel.system_talk_group.talk_group.name %>
+          </div>
+          <div class="col-md-6">
+            <strong>Timeslot:</strong> <%= @channel.system_talk_group.timeslot || "—" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
