@@ -5,9 +5,8 @@ class System < ApplicationRecord
   # Associations
   belongs_to :mode_detail, polymorphic: true, optional: true
 
-  # TODO: Uncomment when SystemNetwork join model is implemented
-  # has_many :system_networks, dependent: :destroy
-  # has_many :networks, through: :system_networks
+  has_many :system_networks, dependent: :destroy
+  has_many :networks, through: :system_networks
 
   # TODO: Uncomment when SystemTalkGroup join model is implemented
   # has_many :system_talk_groups, dependent: :destroy

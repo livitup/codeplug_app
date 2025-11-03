@@ -11,10 +11,11 @@ class SystemsController < ApplicationController
 
   def new
     @system = System.new
+    @networks = Network.order(:name)
   end
 
   def edit
-    # Edit system form
+    @networks = Network.order(:name)
   end
 
   def create
@@ -23,6 +24,7 @@ class SystemsController < ApplicationController
     if @system.save
       redirect_to system_path(@system), notice: "System was successfully created."
     else
+      @networks = Network.order(:name)
       render :new, status: :unprocessable_entity
     end
   end
@@ -31,6 +33,7 @@ class SystemsController < ApplicationController
     if @system.update(system_params)
       redirect_to system_path(@system), notice: "System was successfully updated."
     else
+      @networks = Network.order(:name)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -43,7 +46,7 @@ class SystemsController < ApplicationController
   private
 
   def set_system
-    @system = System.includes(:mode_detail).find(params[:id])
+    @system = System.includes(:mode_detail, :networks).find(params[:id])
   end
 
   def system_params
@@ -51,7 +54,8 @@ class SystemsController < ApplicationController
       :name, :mode, :tx_frequency, :rx_frequency, :bandwidth,
       :supports_tx_tone, :supports_rx_tone, :tx_tone_value, :rx_tone_value,
       :city, :state, :county, :latitude, :longitude,
-      :color_code, :nac
+      :color_code, :nac,
+      network_ids: []
     )
   end
 end

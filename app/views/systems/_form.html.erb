@@ -103,19 +103,41 @@
 
   <!-- DMR Mode Fields -->
   <div id="dmr-fields" class="mode-fields" style="display: none;">
-    <div class="mb-3">
-      <%= f.label :color_code, "Color Code (0-15)", class: "form-label" %>
-      <%= f.number_field :color_code, class: "form-control", min: 0, max: 15, placeholder: "1" %>
-      <div class="form-text">DMR color code for this repeater (0-15)</div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <%= f.label :color_code, "Color Code (0-15)", class: "form-label" %>
+        <%= f.number_field :color_code, class: "form-control", min: 0, max: 15, placeholder: "1" %>
+        <div class="form-text">DMR color code for this repeater (0-15)</div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <%= f.label :network_ids, "Networks (Optional)", class: "form-label" %>
+        <%= f.collection_select :network_ids,
+            @networks.select { |n| n.network_type == "Digital-DMR" },
+            :id, :name,
+            { include_blank: "None" },
+            { class: "form-select", multiple: true, size: 5, id: "dmr_network_ids" } %>
+        <div class="form-text">Select DMR networks this system belongs to</div>
+      </div>
     </div>
   </div>
 
   <!-- P25 Mode Fields -->
   <div id="p25-fields" class="mode-fields" style="display: none;">
-    <div class="mb-3">
-      <%= f.label :nac, "NAC (Network Access Code)", class: "form-label" %>
-      <%= f.text_field :nac, class: "form-control", placeholder: "$293" %>
-      <div class="form-text">P25 Network Access Code (usually in hex format like $293)</div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <%= f.label :nac, "NAC (Network Access Code)", class: "form-label" %>
+        <%= f.text_field :nac, class: "form-control", placeholder: "$293" %>
+        <div class="form-text">P25 Network Access Code (usually in hex format like $293)</div>
+      </div>
+      <div class="col-md-6 mb-3">
+        <%= f.label :network_ids, "Networks (Optional)", class: "form-label" %>
+        <%= f.collection_select :network_ids,
+            @networks.select { |n| n.network_type == "Digital-P25" },
+            :id, :name,
+            { include_blank: "None" },
+            { class: "form-select", multiple: true, size: 5, id: "p25_network_ids" } %>
+        <div class="form-text">Select P25 networks this system belongs to</div>
+      </div>
     </div>
   </div>
 

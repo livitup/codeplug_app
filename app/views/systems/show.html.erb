@@ -68,6 +68,15 @@
             Analog (basic)
           <% end %>
         </dd>
+
+        <% if @system.networks.any? %>
+          <dt class="col-sm-3">Networks:</dt>
+          <dd class="col-sm-9">
+            <% @system.networks.each do |network| %>
+              <%= link_to network.name, network_path(network), class: "badge bg-info text-decoration-none me-1" %>
+            <% end %>
+          </dd>
+        <% end %>
       </dl>
     </div>
   </div>
