@@ -50,6 +50,16 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
     assert_select "dd", text: /144\.630/
   end
 
+  test "show should display associated networks" do
+    dmr_network = create(:network, name: "Brandmeister", network_type: "Digital-DMR")
+    sys = create(:system, mode: "dmr", color_code: 1)
+    sys.networks << dmr_network
+
+    get system_path(sys)
+    assert_select "dt", text: /Networks/
+    assert_select "a.badge", text: /Brandmeister/
+  end
+
   # New Tests
   test "should get new" do
     get new_system_path
@@ -106,6 +116,55 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
       }
     end
     assert_redirected_to system_path(System.last)
+  end
+
+  # Network Association Tests
+  test "should create DMR system with network associations" do
+    dmr_network1 = create(:network, name: "Brandmeister", network_type: "Digital-DMR")
+    dmr_network2 = create(:network, name: "DMRVA", network_type: "Digital-DMR")
+
+    assert_difference("System.count", 1) do
+      assert_difference("SystemNetwork.count", 2) do
+        post systems_path, params: {
+          system: {
+            name: "Test DMR System with Networks",
+            mode: "dmr",
+            tx_frequency: 145.430,
+            rx_frequency: 144.830,
+            color_code: 1,
+            network_ids: [ dmr_network1.id, dmr_network2.id ]
+          }
+        }
+      end
+    end
+
+    assert_redirected_to system_path(System.last)
+    assert_equal 2, System.last.networks.count
+    assert_includes System.last.networks, dmr_network1
+    assert_includes System.last.networks, dmr_network2
+  end
+
+  test "should create P25 system with network associations" do
+    p25_network = create(:network, :p25_network)
+
+    assert_difference("System.count", 1) do
+      assert_difference("SystemNetwork.count", 1) do
+        post systems_path, params: {
+          system: {
+            name: "Test P25 System with Network",
+            mode: "p25",
+            tx_frequency: 154.950,
+            rx_frequency: 154.950,
+            nac: "$293",
+            network_ids: [ p25_network.id ]
+          }
+        }
+      end
+    end
+
+    assert_redirected_to system_path(System.last)
+    assert_equal 1, System.last.networks.count
+    assert_equal p25_network, System.last.networks.first
   end
 
   test "should not create system with invalid attributes" do
