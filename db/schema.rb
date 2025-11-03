@@ -10,13 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_03_013430) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "analog_mode_details", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "channel_zones", force: :cascade do |t|
+    t.bigint "channel_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "position", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "zone_id", null: false
+    t.index ["channel_id"], name: "index_channel_zones_on_channel_id"
+    t.index ["zone_id", "position"], name: "index_channel_zones_on_zone_id_and_position", unique: true
+    t.index ["zone_id"], name: "index_channel_zones_on_zone_id"
   end
 
   create_table "channels", force: :cascade do |t|
@@ -183,6 +194,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_013430) do
     t.index ["codeplug_id"], name: "index_zones_on_codeplug_id"
   end
 
+  add_foreign_key "channel_zones", "channels"
+  add_foreign_key "channel_zones", "zones"
   add_foreign_key "channels", "codeplugs"
   add_foreign_key "channels", "system_talk_groups"
   add_foreign_key "channels", "systems"
