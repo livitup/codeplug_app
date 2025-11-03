@@ -5,6 +5,7 @@
       <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, @channel), class: "btn btn-secondary me-2" %>
       <%= button_to "Delete", codeplug_channel_path(@codeplug, @channel), method: :delete,
           class: "btn btn-danger",
+          form: { class: "d-inline" },
           data: { confirm: "Are you sure?" } %>
     </div>
   </div>

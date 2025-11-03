@@ -21,7 +21,7 @@
               <td><%= link_to codeplug.name, codeplug_path(codeplug) %></td>
               <td><%= truncate(codeplug.description, length: 50) || "—" %></td>
               <td><%= codeplug.public ? "✓" : "—" %></td>
-              <td class="text-end">
+              <td class="text-end text-nowrap">
                 <%= link_to "View", codeplug_path(codeplug), class: "btn btn-sm btn-info me-1" %>
                 <%= link_to "Channels", codeplug_channels_path(codeplug), class: "btn btn-sm btn-success me-1" %>
                 <%= link_to "Edit", edit_codeplug_path(codeplug), class: "btn btn-sm btn-secondary me-1" %>

@@ -27,7 +27,7 @@
               <td><%= channel.system_talk_group&.talk_group&.name || "—" %></td>
               <td><%= channel.power_level || "—" %></td>
               <td><span class="badge bg-secondary"><%= channel.tone_mode %></span></td>
-              <td class="text-end">
+              <td class="text-end text-nowrap">
                 <%= link_to "View", codeplug_channel_path(@codeplug, channel), class: "btn btn-sm btn-info me-1" %>
                 <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, channel), class: "btn btn-sm btn-secondary me-1" %>
                 <%= button_to "Delete", codeplug_channel_path(@codeplug, channel), method: :delete,
