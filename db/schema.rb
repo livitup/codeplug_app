@@ -10,13 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_03_010759) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_03_013430) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "analog_mode_details", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.string "bandwidth"
+    t.bigint "codeplug_id", null: false
+    t.datetime "created_at", null: false
+    t.string "long_name"
+    t.string "name", null: false
+    t.string "power_level"
+    t.string "short_name"
+    t.bigint "system_id", null: false
+    t.bigint "system_talk_group_id"
+    t.string "tone_mode", default: "none", null: false
+    t.string "transmit_permission", default: "allow", null: false
+    t.datetime "updated_at", null: false
+    t.index ["codeplug_id"], name: "index_channels_on_codeplug_id"
+    t.index ["system_id"], name: "index_channels_on_system_id"
+    t.index ["system_talk_group_id"], name: "index_channels_on_system_talk_group_id"
   end
 
   create_table "codeplug_layouts", force: :cascade do |t|
@@ -165,6 +183,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_010759) do
     t.index ["codeplug_id"], name: "index_zones_on_codeplug_id"
   end
 
+  add_foreign_key "channels", "codeplugs"
+  add_foreign_key "channels", "system_talk_groups"
+  add_foreign_key "channels", "systems"
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
   add_foreign_key "codeplugs", "users"
