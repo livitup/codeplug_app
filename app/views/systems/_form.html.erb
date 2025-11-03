@@ -135,8 +135,10 @@
 
   <script>
     // Show/hide mode-specific fields based on selected mode
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('turbo:load', function() {
       const modeSelect = document.querySelector('#system_mode');
+      if (!modeSelect) return; // Exit if not on system form
+
       const modeFields = document.querySelectorAll('.mode-fields');
 
       function updateModeFields() {
