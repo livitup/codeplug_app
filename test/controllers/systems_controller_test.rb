@@ -4,8 +4,7 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = create(:user)
     log_in_as(@user)
-    @dmr_detail = create(:dmr_mode_detail, color_code: 1)
-    @system = create(:system, mode: "dmr", mode_detail: @dmr_detail)
+    @system = create(:system)
   end
 
   # Index Tests
@@ -20,7 +19,7 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index should display system names and frequencies" do
-    sys1 = create(:system, name: "W4ABC Repeater", mode: "dmr", mode_detail: @dmr_detail)
+    sys1 = create(:system, name: "W4ABC Repeater")
     sys2 = create(:system, :analog, name: "Test Repeater")
     get systems_path
     assert_select "td", text: /W4ABC Repeater/
@@ -42,7 +41,7 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
     sys = create(:system,
       name: "W4ABC Repeater",
       mode: "dmr",
-      mode_detail: @dmr_detail,
+      color_code: 1,
       tx_frequency: 145.230,
       rx_frequency: 144.630)
     get system_path(sys)
@@ -64,7 +63,6 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
 
   # Create Tests - DMR
   test "should create DMR system with valid attributes" do
-    dmr_detail = create(:dmr_mode_detail, color_code: 2)
     assert_difference("System.count", 1) do
       post systems_path, params: {
         system: {
@@ -72,8 +70,7 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
           mode: "dmr",
           tx_frequency: 145.430,
           rx_frequency: 144.830,
-          mode_detail_id: dmr_detail.id,
-          mode_detail_type: "DmrModeDetail"
+          color_code: 2
         }
       }
     end
@@ -82,16 +79,13 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
 
   # Create Tests - Analog
   test "should create analog system with valid attributes" do
-    analog_detail = create(:analog_mode_detail)
     assert_difference("System.count", 1) do
       post systems_path, params: {
         system: {
           name: "Test Analog System",
           mode: "analog",
           tx_frequency: 146.940,
-          rx_frequency: 146.340,
-          mode_detail_id: analog_detail.id,
-          mode_detail_type: "AnalogModeDetail"
+          rx_frequency: 146.340
         }
       }
     end
@@ -100,7 +94,6 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
 
   # Create Tests - P25
   test "should create P25 system with valid attributes" do
-    p25_detail = create(:p25_mode_detail, nac: "293")
     assert_difference("System.count", 1) do
       post systems_path, params: {
         system: {
@@ -108,8 +101,7 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
           mode: "p25",
           tx_frequency: 154.950,
           rx_frequency: 154.950,
-          mode_detail_id: p25_detail.id,
-          mode_detail_type: "P25ModeDetail"
+          nac: "$293"
         }
       }
     end

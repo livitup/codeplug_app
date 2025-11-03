@@ -51,7 +51,7 @@ class SystemsController < ApplicationController
       :name, :mode, :tx_frequency, :rx_frequency, :bandwidth,
       :supports_tx_tone, :supports_rx_tone, :tx_tone_value, :rx_tone_value,
       :city, :state, :county, :latitude, :longitude,
-      :mode_detail_id, :mode_detail_type
+      :color_code, :nac
     )
   end
 end

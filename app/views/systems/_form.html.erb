@@ -99,26 +99,71 @@
     </div>
   </div>
 
-  <h5 class="mt-4 mb-3">Mode Details (Required)</h5>
-  <div class="alert alert-info">
-    <strong>Note:</strong> Mode details must be created separately. Please ensure the appropriate mode detail exists before creating a system.
-  </div>
+  <h5 class="mt-4 mb-3">Mode-Specific Settings</h5>
 
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <%= f.label :mode_detail_type, "Mode Detail Type", class: "form-label" %>
-      <%= f.select :mode_detail_type,
-          [ [ "DMR Mode Detail", "DmrModeDetail" ], [ "P25 Mode Detail", "P25ModeDetail" ], [ "Analog Mode Detail", "AnalogModeDetail" ] ],
-          { prompt: "Select type" },
-          { class: "form-select", required: true } %>
-    </div>
-
-    <div class="col-md-6 mb-3">
-      <%= f.label :mode_detail_id, "Mode Detail ID", class: "form-label" %>
-      <%= f.number_field :mode_detail_id, class: "form-control", required: true, placeholder: "1" %>
-      <div class="form-text">ID of the existing mode detail record</div>
+  <!-- DMR Mode Fields -->
+  <div id="dmr-fields" class="mode-fields" style="display: none;">
+    <div class="mb-3">
+      <%= f.label :color_code, "Color Code (0-15)", class: "form-label" %>
+      <%= f.number_field :color_code, class: "form-control", min: 0, max: 15, placeholder: "1" %>
+      <div class="form-text">DMR color code for this repeater (0-15)</div>
     </div>
   </div>
+
+  <!-- P25 Mode Fields -->
+  <div id="p25-fields" class="mode-fields" style="display: none;">
+    <div class="mb-3">
+      <%= f.label :nac, "NAC (Network Access Code)", class: "form-label" %>
+      <%= f.text_field :nac, class: "form-control", placeholder: "$293" %>
+      <div class="form-text">P25 Network Access Code (usually in hex format like $293)</div>
+    </div>
+  </div>
+
+  <!-- Analog Mode Message -->
+  <div id="analog-fields" class="mode-fields" style="display: none;">
+    <div class="alert alert-info">
+      <strong>Analog Mode:</strong> No additional mode-specific settings required.
+    </div>
+  </div>
+
+  <!-- NXDN Mode Message -->
+  <div id="nxdn-fields" class="mode-fields" style="display: none;">
+    <div class="alert alert-info">
+      <strong>NXDN Mode:</strong> No additional mode-specific settings required.
+    </div>
+  </div>
+
+  <script>
+    // Show/hide mode-specific fields based on selected mode
+    document.addEventListener('DOMContentLoaded', function() {
+      const modeSelect = document.querySelector('#system_mode');
+      const modeFields = document.querySelectorAll('.mode-fields');
+
+      function updateModeFields() {
+        const selectedMode = modeSelect.value;
+
+        // Hide all mode-specific fields
+        modeFields.forEach(field => field.style.display = 'none');
+
+        // Show the appropriate fields based on selected mode
+        if (selectedMode === 'dmr') {
+          document.querySelector('#dmr-fields').style.display = 'block';
+        } else if (selectedMode === 'p25') {
+          document.querySelector('#p25-fields').style.display = 'block';
+        } else if (selectedMode === 'analog') {
+          document.querySelector('#analog-fields').style.display = 'block';
+        } else if (selectedMode === 'nxdn') {
+          document.querySelector('#nxdn-fields').style.display = 'block';
+        }
+      }
+
+      // Run on page load
+      updateModeFields();
+
+      // Run when mode changes
+      modeSelect.addEventListener('change', updateModeFields);
+    });
+  </script>
 
   <div class="d-flex gap-2 mt-4">
     <%= f.submit class: "btn btn-primary" %>

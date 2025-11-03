@@ -15,13 +15,13 @@ FactoryBot.define do
     latitude { 37.5407 }
     longitude { -77.4360 }
 
-    # Default to DMR mode detail
-    association :mode_detail, factory: :dmr_mode_detail
+    # Default to DMR mode with color_code
+    color_code { 1 }
 
     # Trait for analog repeater
     trait :analog do
       mode { "analog" }
-      association :mode_detail, factory: :analog_mode_detail
+      color_code { nil }
       supports_tx_tone { true }
       tx_tone_value { "127.3" }
     end
@@ -29,13 +29,14 @@ FactoryBot.define do
     # Trait for P25 system
     trait :p25 do
       mode { "p25" }
-      association :mode_detail, factory: :p25_mode_detail
+      color_code { nil }
+      nac { "$293" }
     end
 
     # Trait for NXDN system
     trait :nxdn do
       mode { "nxdn" }
-      association :mode_detail, factory: :analog_mode_detail
+      color_code { nil }
     end
 
     # Trait for simplex
