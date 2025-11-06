@@ -1,0 +1,58 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><%= @zone.name %></h1>
+    <div>
+      <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary me-2" %>
+      <%= button_to "Delete", codeplug_zone_path(@codeplug, @zone), method: :delete,
+          class: "btn btn-danger",
+          form: { class: "d-inline" },
+          data: { turbo_confirm: "Are you sure?" } %>
+    </div>
+  </div>
+
+  <%= link_to "← Back to Zones", codeplug_zones_path(@codeplug), class: "btn btn-secondary mb-3" %>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Zone Details</h5>
+
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <strong>Name:</strong> <%= @zone.name %>
+        </div>
+        <div class="col-md-4">
+          <strong>Long Name:</strong> <%= @zone.long_name || "—" %>
+        </div>
+        <div class="col-md-4">
+          <strong>Short Name:</strong> <%= @zone.short_name || "—" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Channels</h5>
+
+      <% if @zone.channels.any? %>
+        <p class="text-muted mb-3"><strong><%= pluralize(@zone.channels.count, "channel") %></strong></p>
+        <div class="list-group">
+          <% @zone.channels.each do |channel| %>
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong><%= channel.long_name %></strong>
+                  <% if channel.system %>
+                    <span class="badge bg-info ms-2"><%= channel.system.mode.upcase %></span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-muted">No channels in this zone yet.</p>
+      <% end %>
+    </div>
+  </div>
+</div>

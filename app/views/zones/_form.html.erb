@@ -1,0 +1,35 @@
+<%= form_with model: [ @codeplug, zone ] do |f| %>
+  <% if zone.errors.any? %>
+    <div class="alert alert-danger">
+      <h5><%= pluralize(zone.errors.count, "error") %> prohibited this zone from being saved:</h5>
+      <ul>
+        <% zone.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= f.label :name, class: "form-label" %>
+    <%= f.text_field :name, class: "form-control", required: true, placeholder: "e.g., Zone 1" %>
+    <div class="form-text">Short identifier for this zone</div>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :long_name, class: "form-label" %>
+    <%= f.text_field :long_name, class: "form-control", placeholder: "e.g., Local Repeaters" %>
+    <div class="form-text">Long descriptive name (for radios that support it)</div>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :short_name, class: "form-label" %>
+    <%= f.text_field :short_name, class: "form-control", placeholder: "e.g., LCL", maxlength: 10 %>
+    <div class="form-text">Abbreviated name (for radios with limited display)</div>
+  </div>
+
+  <div class="d-flex gap-2 mt-4">
+    <%= f.submit class: "btn btn-primary" %>
+    <%= link_to "Cancel", zone.persisted? ? codeplug_zone_path(@codeplug, zone) : codeplug_zones_path(@codeplug), class: "btn btn-secondary" %>
+  </div>
+<% end %>
