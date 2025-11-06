@@ -102,7 +102,7 @@
   <h5 class="mt-4 mb-3">Mode-Specific Settings</h5>
 
   <!-- DMR Mode Fields -->
-  <div id="dmr-fields" class="mode-fields" style="display: none;">
+  <div id="dmr-fields" class="mode-fields" style="display: <%= system.mode == 'dmr' ? 'block' : 'none' %>;">
     <div class="row">
       <div class="col-md-6 mb-3">
         <%= f.label :color_code, "Color Code (0-15)", class: "form-label" %>
@@ -122,7 +122,7 @@
   </div>
 
   <!-- P25 Mode Fields -->
-  <div id="p25-fields" class="mode-fields" style="display: none;">
+  <div id="p25-fields" class="mode-fields" style="display: <%= system.mode == 'p25' ? 'block' : 'none' %>;">
     <div class="row">
       <div class="col-md-6 mb-3">
         <%= f.label :nac, "NAC (Network Access Code)", class: "form-label" %>
@@ -142,14 +142,14 @@
   </div>
 
   <!-- Analog Mode Message -->
-  <div id="analog-fields" class="mode-fields" style="display: none;">
+  <div id="analog-fields" class="mode-fields" style="display: <%= system.mode == 'analog' ? 'block' : 'none' %>;">
     <div class="alert alert-info">
       <strong>Analog Mode:</strong> No additional mode-specific settings required.
     </div>
   </div>
 
   <!-- NXDN Mode Message -->
-  <div id="nxdn-fields" class="mode-fields" style="display: none;">
+  <div id="nxdn-fields" class="mode-fields" style="display: <%= system.mode == 'nxdn' ? 'block' : 'none' %>;">
     <div class="alert alert-info">
       <strong>NXDN Mode:</strong> No additional mode-specific settings required.
     </div>

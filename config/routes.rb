@@ -27,7 +27,9 @@ Rails.application.routes.draw do
   resources :talk_groups
 
   # Systems and infrastructure
-  resources :systems
+  resources :systems do
+    resources :system_talk_groups, only: [ :create, :destroy ]
+  end
 
   # Codeplugs and channels (nested)
   resources :codeplugs do

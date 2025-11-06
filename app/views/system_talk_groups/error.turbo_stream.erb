@@ -1,0 +1,15 @@
+<%= turbo_stream.update "system_talk_group_form" do %>
+  <%= render "system_talk_groups/form", system: @system %>
+  <div class="alert alert-danger mt-3" role="alert">
+    <strong>Error:</strong>
+    <% if @system_talk_group.errors.any? %>
+      <ul class="mb-0">
+        <% @system_talk_group.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      Unable to add TalkGroup. Please try again.
+    <% end %>
+  </div>
+<% end %>

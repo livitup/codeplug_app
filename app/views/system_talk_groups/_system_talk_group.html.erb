@@ -1,0 +1,15 @@
+<div id="system_talk_group_<%= system_talk_group.id %>" class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+  <div>
+    <%= link_to system_talk_group.talk_group.name, talk_group_path(system_talk_group.talk_group), class: "text-decoration-none" %>
+    <span class="badge bg-secondary"><%= system_talk_group.talk_group.talkgroup_number %></span>
+    <% if system_talk_group.timeslot.present? %>
+      <span class="badge bg-info">TS<%= system_talk_group.timeslot %></span>
+    <% end %>
+  </div>
+  <div>
+    <%= button_to "Remove", system_system_talk_group_path(system, system_talk_group),
+        method: :delete,
+        class: "btn btn-sm btn-outline-danger",
+        form: { data: { turbo_confirm: "Remove this talkgroup?" } } %>
+  </div>
+</div>
