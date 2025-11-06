@@ -1,14 +1,20 @@
 class ZonesController < ApplicationController
   before_action :set_codeplug
   before_action :authorize_codeplug
-  before_action :set_zone, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_zone, only: [ :show, :edit, :update, :destroy, :update_positions ]
 
   def index
     @zones = @codeplug.zones.order(:name)
   end
 
   def show
-    # Display zone details
+    # Get channels already in this zone
+    channel_ids_in_zone = @zone.channel_zones.pluck(:channel_id)
+
+    # Get available channels (channels in codeplug that aren't already in this zone)
+    @available_channels = @codeplug.channels
+                                    .where.not(id: channel_ids_in_zone)
+                                    .order(:long_name)
   end
 
   def new
@@ -40,6 +46,26 @@ class ZonesController < ApplicationController
   def destroy
     @zone.destroy!
     redirect_to codeplug_zones_path(@codeplug), notice: "Zone was successfully deleted."
+  end
+
+  def update_positions
+    positions_params = params.permit(positions: [ :id, :position ])
+
+    ActiveRecord::Base.transaction do
+      # First pass: Set temporary positions to avoid uniqueness conflicts
+      positions_params[:positions].each_with_index do |position_data, index|
+        channel_zone = @zone.channel_zones.find(position_data[:id])
+        channel_zone.update_column(:position, 1000 + index)
+      end
+
+      # Second pass: Set actual positions
+      positions_params[:positions].each do |position_data|
+        channel_zone = @zone.channel_zones.find(position_data[:id])
+        channel_zone.update!(position: position_data[:position])
+      end
+    end
+
+    head :ok
   end
 
   private

@@ -21,7 +21,8 @@
     "nodemon": "^3.1.10",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
-    "sass": "1.77.2"
+    "sass": "1.77.2",
+    "sortablejs": "^1.15.6"
   },
   "browserslist": [
     "defaults"
