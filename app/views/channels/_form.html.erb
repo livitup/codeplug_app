@@ -71,7 +71,13 @@
   <div class="row">
     <div class="col-md-6 mb-3">
       <%= f.label :tone_mode, class: "form-label" %>
-      <%= f.select :tone_mode, Channel::TONE_MODES,
+      <%= f.select :tone_mode,
+          [
+            ["None", "none"],
+            ["TX Only (Encode)", "tx_only"],
+            ["RX Only (Decode)", "rx_only"],
+            ["TX/RX (Encode & Decode)", "tx_rx"]
+          ],
           { prompt: "Select tone mode" },
           { class: "form-select", required: true } %>
       <div class="form-text">CTCSS/DCS tone usage</div>
@@ -79,7 +85,11 @@
 
     <div class="col-md-6 mb-3">
       <%= f.label :transmit_permission, class: "form-label" %>
-      <%= f.select :transmit_permission, Channel::TRANSMIT_PERMISSIONS,
+      <%= f.select :transmit_permission,
+          [
+            ["RX/TX", "allow"],
+            ["RX Only", "forbid_tx"]
+          ],
           { prompt: "Select permission" },
           { class: "form-select", required: true } %>
       <div class="form-text">Allow or forbid transmission</div>
