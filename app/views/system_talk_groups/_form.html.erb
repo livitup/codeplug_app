@@ -1,0 +1,30 @@
+<div id="system_talk_group_form">
+  <%= form_with model: [ system, SystemTalkGroup.new ], local: false do |f| %>
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <%= f.label :talk_group_id, "TalkGroup", class: "form-label" %>
+        <%= f.select :talk_group_id,
+            options_from_collection_for_select(TalkGroup.order(:name), :id, :name),
+            { prompt: "Select a talkgroup" },
+            { class: "form-select", required: true } %>
+      </div>
+
+      <div class="col-md-3">
+        <%= f.label :timeslot, "Timeslot", class: "form-label" %>
+        <% if system.mode == "dmr" %>
+          <small class="text-danger d-block">* Required for DMR</small>
+        <% else %>
+          <small class="text-muted d-block">Optional</small>
+        <% end %>
+        <%= f.select :timeslot,
+            [ ["None", ""], ["Timeslot 1", 1], ["Timeslot 2", 2] ],
+            {},
+            { class: "form-select", required: system.mode == "dmr" } %>
+      </div>
+
+      <div class="col-md-4">
+        <%= f.submit "Add TalkGroup", class: "btn btn-primary w-100" %>
+      </div>
+    </div>
+  <% end %>
+</div>

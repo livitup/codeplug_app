@@ -1,0 +1,7 @@
+<%= turbo_stream.remove "system_talk_group_#{@system_talk_group.id}" %>
+
+<% if @system.system_talk_groups.empty? %>
+  <%= turbo_stream.append "system_talk_groups" do %>
+    <p id="empty_talkgroups_message" class="text-muted">No talkgroups associated with this system yet.</p>
+  <% end %>
+<% end %>

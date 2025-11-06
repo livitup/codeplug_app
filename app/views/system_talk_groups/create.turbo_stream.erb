@@ -1,0 +1,9 @@
+<%= turbo_stream.remove "empty_talkgroups_message" %>
+
+<%= turbo_stream.append "system_talk_groups" do %>
+  <%= render "system_talk_groups/system_talk_group", system_talk_group: @system_talk_group, system: @system %>
+<% end %>
+
+<%= turbo_stream.update "system_talk_group_form" do %>
+  <%= render "system_talk_groups/form", system: @system %>
+<% end %>

@@ -46,7 +46,7 @@ class SystemsController < ApplicationController
   private
 
   def set_system
-    @system = System.includes(:mode_detail, :networks).find(params[:id])
+    @system = System.includes(:mode_detail, :networks, system_talk_groups: :talk_group).find(params[:id])
   end
 
   def system_params

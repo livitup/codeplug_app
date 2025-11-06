@@ -8,9 +8,8 @@ class System < ApplicationRecord
   has_many :system_networks, dependent: :destroy
   has_many :networks, through: :system_networks
 
-  # TODO: Uncomment when SystemTalkGroup join model is implemented
-  # has_many :system_talk_groups, dependent: :destroy
-  # has_many :talk_groups, through: :system_talk_groups
+  has_many :system_talk_groups, dependent: :destroy
+  has_many :talk_groups, through: :system_talk_groups
 
   # TODO: Uncomment when Channel model is implemented
   # has_many :channels

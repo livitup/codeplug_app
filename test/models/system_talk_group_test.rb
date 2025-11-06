@@ -20,9 +20,17 @@ class SystemTalkGroupTest < ActiveSupport::TestCase
   end
 
   # Timeslot Validation Tests
-  test "should save system_talk_group with nil timeslot" do
-    system_talk_group = build(:system_talk_group, timeslot: nil)
-    assert system_talk_group.save, "Failed to save system_talk_group with nil timeslot"
+  test "should save system_talk_group with nil timeslot for non-DMR system" do
+    analog_system = create(:system, :analog)
+    system_talk_group = build(:system_talk_group, system: analog_system, timeslot: nil)
+    assert system_talk_group.save, "Failed to save system_talk_group with nil timeslot for non-DMR"
+  end
+
+  test "should not save system_talk_group with nil timeslot for DMR system" do
+    dmr_system = create(:system, mode: "dmr")
+    system_talk_group = build(:system_talk_group, system: dmr_system, timeslot: nil)
+    assert_not system_talk_group.save, "Saved system_talk_group with nil timeslot for DMR system"
+    assert_includes system_talk_group.errors[:timeslot], "is required for DMR systems"
   end
 
   test "should save system_talk_group with timeslot 1" do
@@ -68,20 +76,20 @@ class SystemTalkGroupTest < ActiveSupport::TestCase
   end
 
   test "should save system_talk_group with same system and talk_group but one nil timeslot" do
-    system = create(:system)
+    analog_system = create(:system, :analog)
     talk_group = create(:talk_group)
-    create(:system_talk_group, system: system, talk_group: talk_group, timeslot: 1)
+    create(:system_talk_group, system: analog_system, talk_group: talk_group, timeslot: 1)
 
-    stg2 = build(:system_talk_group, system: system, talk_group: talk_group, timeslot: nil)
+    stg2 = build(:system_talk_group, system: analog_system, talk_group: talk_group, timeslot: nil)
     assert stg2.save, "Failed to save system_talk_group with nil timeslot"
   end
 
   test "should not save system_talk_group with duplicate system, talk_group, and nil timeslot" do
-    system = create(:system)
+    analog_system = create(:system, :analog)
     talk_group = create(:talk_group)
-    create(:system_talk_group, system: system, talk_group: talk_group, timeslot: nil)
+    create(:system_talk_group, system: analog_system, talk_group: talk_group, timeslot: nil)
 
-    duplicate = build(:system_talk_group, system: system, talk_group: talk_group, timeslot: nil)
+    duplicate = build(:system_talk_group, system: analog_system, talk_group: talk_group, timeslot: nil)
     assert_not duplicate.save, "Saved system_talk_group with duplicate system/talk_group/nil timeslot"
   end
 
