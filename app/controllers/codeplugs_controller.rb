@@ -1,8 +1,10 @@
 class CodeplugsController < ApplicationController
   before_action :set_codeplug, only: [ :show, :edit, :update, :destroy ]
+  before_action :authorize_codeplug, only: [ :edit, :update, :destroy ]
+  before_action :authorize_view, only: [ :show ]
 
   def index
-    @codeplugs = Codeplug.order(:name)
+    @codeplugs = current_user.codeplugs.order(:name)
   end
 
   def show
@@ -10,7 +12,7 @@ class CodeplugsController < ApplicationController
   end
 
   def new
-    @codeplug = Codeplug.new
+    @codeplug = current_user.codeplugs.new
   end
 
   def edit
@@ -18,7 +20,7 @@ class CodeplugsController < ApplicationController
   end
 
   def create
-    @codeplug = Codeplug.new(codeplug_params)
+    @codeplug = current_user.codeplugs.new(codeplug_params)
 
     if @codeplug.save
       redirect_to codeplug_path(@codeplug), notice: "Codeplug was successfully created."
@@ -43,10 +45,22 @@ class CodeplugsController < ApplicationController
   private
 
   def set_codeplug
-    @codeplug = Codeplug.find(params[:id])
+    @codeplug = Codeplug.includes(:zones, channels: :system).find(params[:id])
+  end
+
+  def authorize_codeplug
+    unless @codeplug.user == current_user
+      redirect_to codeplugs_path, alert: "You don't have permission to access this codeplug."
+    end
+  end
+
+  def authorize_view
+    unless @codeplug.user == current_user || @codeplug.public?
+      redirect_to codeplugs_path, alert: "You don't have permission to access this codeplug."
+    end
   end
 
   def codeplug_params
-    params.require(:codeplug).permit(:name, :description, :public, :user_id)
+    params.require(:codeplug).permit(:name, :description, :public)
   end
 end
