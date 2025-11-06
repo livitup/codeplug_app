@@ -28,7 +28,7 @@
                 <%= button_to "Delete", codeplug_path(codeplug), method: :delete,
                     class: "btn btn-sm btn-danger",
                     form: { class: "d-inline" },
-                    data: { confirm: "Are you sure?" } %>
+                    data: { turbo_confirm: "Are you sure?" } %>
               </td>
             </tr>
           <% end %>
