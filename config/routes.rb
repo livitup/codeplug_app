@@ -33,6 +33,7 @@ Rails.application.routes.draw do
 
   # Codeplugs and channels (nested)
   resources :codeplugs do
+    resources :zones
     resources :channels
   end
 
