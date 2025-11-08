@@ -128,30 +128,73 @@
           <h5 class="card-title mb-0">Systems</h5>
         </div>
 
+        <% if @zone.editable_by?(current_user) %>
+          <% available_systems = System.where.not(id: @zone.zone_systems.pluck(:system_id)).order(:name) %>
+          <% if available_systems.any? %>
+            <div class="card mb-3 bg-light">
+              <div class="card-body">
+                <%= form_with(model: @zone.zone_systems.new, url: zone_zone_systems_path(@zone), method: :post, local: true, class: "row g-3") do |f| %>
+                  <div class="col-auto flex-grow-1">
+                    <%= f.select :system_id,
+                        options_from_collection_for_select(available_systems, :id, :name),
+                        { prompt: "Select a system to add..." },
+                        { class: "form-select" } %>
+                  </div>
+                  <div class="col-auto">
+                    <%= f.submit "Add System", class: "btn btn-primary" %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+
         <% if @zone_systems.any? %>
           <p class="text-muted mb-3"><strong><%= pluralize(@zone_systems.count, "system") %></strong></p>
-          <div class="list-group">
+          <div class="list-group"
+               data-controller="sortable"
+               data-sortable-url-value="<%= update_positions_zone_path(@zone) %>">
             <% @zone_systems.each do |zone_system| %>
-              <div class="list-group-item">
+              <div class="list-group-item" data-id="<%= zone_system.id %>">
                 <div class="d-flex justify-content-between align-items-center">
-                  <div class="flex-grow-1">
-                    <strong><%= zone_system.system.name %></strong>
-                    <span class="badge bg-info ms-2"><%= zone_system.system.mode.upcase %></span>
-                    <br>
-                    <small class="text-muted">
-                      <%= zone_system.system.rx_frequency %> MHz
-                      <% if zone_system.system.tx_frequency != zone_system.system.rx_frequency %>
-                        / <%= zone_system.system.tx_frequency %> MHz
+                  <div class="d-flex align-items-center flex-grow-1">
+                    <% if @zone.editable_by?(current_user) %>
+                      <span class="drag-handle me-3" style="cursor: grab;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
+                          <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                      </span>
+                    <% end %>
+                    <div class="flex-grow-1">
+                      <strong><%= zone_system.system.name %></strong>
+                      <span class="badge bg-info ms-2"><%= zone_system.system.mode.upcase %></span>
+                      <br>
+                      <small class="text-muted">
+                        <%= zone_system.system.rx_frequency %> MHz
+                        <% if zone_system.system.tx_frequency != zone_system.system.rx_frequency %>
+                          / <%= zone_system.system.tx_frequency %> MHz
+                        <% end %>
+                      </small>
+                      <% if zone_system.system.mode == "dmr" || zone_system.system.mode == "p25" %>
+                        <br>
+                        <small class="text-info">Talkgroups: (configure in next phase)</small>
                       <% end %>
-                    </small>
+                    </div>
+                    <span class="badge bg-secondary me-2"><%= zone_system.position %></span>
+                    <% if @zone.editable_by?(current_user) %>
+                      <%= button_to "Remove", zone_zone_system_path(@zone, zone_system),
+                          method: :delete,
+                          class: "btn btn-sm btn-outline-danger",
+                          form: { class: "d-inline" },
+                          data: { turbo_confirm: "Remove this system from the zone?" } %>
+                    <% end %>
                   </div>
-                  <span class="badge bg-secondary"><%= zone_system.position %></span>
                 </div>
               </div>
             <% end %>
           </div>
         <% else %>
-          <p class="text-muted">No systems in this zone yet.</p>
+          <p class="text-muted">No systems in this zone yet. <%= "Add systems using the form above." if @zone.editable_by?(current_user) && System.count > 0 %></p>
         <% end %>
       </div>
     </div>

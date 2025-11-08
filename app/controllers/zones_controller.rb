@@ -3,7 +3,7 @@ class ZonesController < ApplicationController
   before_action :set_codeplug, if: :nested_route?
   before_action :authorize_codeplug, if: :nested_route?
   before_action :set_zone, only: [ :show, :edit, :update, :destroy, :update_positions ]
-  before_action :authorize_zone, only: [ :show, :edit, :update, :destroy ], unless: :nested_route?
+  before_action :authorize_zone, only: [ :show, :edit, :update, :destroy, :update_positions ], unless: :nested_route?
 
   def index
     if nested_route?
@@ -88,16 +88,32 @@ class ZonesController < ApplicationController
     positions_params = params.permit(positions: [ :id, :position ])
 
     ActiveRecord::Base.transaction do
-      # First pass: Set temporary positions to avoid uniqueness conflicts
-      positions_params[:positions].each_with_index do |position_data, index|
-        channel_zone = @zone.channel_zones.find(position_data[:id])
-        channel_zone.update_column(:position, 1000 + index)
-      end
+      if nested_route?
+        # Update channel positions for codeplug zones
+        # First pass: Set temporary positions to avoid uniqueness conflicts
+        positions_params[:positions].each_with_index do |position_data, index|
+          channel_zone = @zone.channel_zones.find(position_data[:id])
+          channel_zone.update_column(:position, 1000 + index)
+        end
 
-      # Second pass: Set actual positions
-      positions_params[:positions].each do |position_data|
-        channel_zone = @zone.channel_zones.find(position_data[:id])
-        channel_zone.update!(position: position_data[:position])
+        # Second pass: Set actual positions
+        positions_params[:positions].each do |position_data|
+          channel_zone = @zone.channel_zones.find(position_data[:id])
+          channel_zone.update!(position: position_data[:position])
+        end
+      else
+        # Update zone_system positions for standalone zones
+        # First pass: Set temporary positions to avoid uniqueness conflicts
+        positions_params[:positions].each_with_index do |position_data, index|
+          zone_system = @zone.zone_systems.find(position_data[:id])
+          zone_system.update_column(:position, 1000 + index)
+        end
+
+        # Second pass: Set actual positions
+        positions_params[:positions].each do |position_data|
+          zone_system = @zone.zone_systems.find(position_data[:id])
+          zone_system.update!(position: position_data[:position])
+        end
       end
     end
 
@@ -132,7 +148,7 @@ class ZonesController < ApplicationController
       unless @zone.viewable_by?(current_user)
         head :forbidden
       end
-    elsif [ :edit, :update, :destroy ].include?(action)
+    elsif [ :edit, :update, :destroy, :update_positions ].include?(action)
       unless @zone.editable_by?(current_user)
         head :forbidden
       end

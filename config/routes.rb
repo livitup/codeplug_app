@@ -32,7 +32,12 @@ Rails.application.routes.draw do
   end
 
   # Standalone zones (new top-level resource)
-  resources :zones, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+  resources :zones, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
+    resources :zone_systems, only: [ :create, :destroy ]
+    member do
+      patch :update_positions
+    end
+  end
 
   # Codeplugs and channels (nested)
   resources :codeplugs do
