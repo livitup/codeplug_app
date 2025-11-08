@@ -41,6 +41,9 @@
             <%= link_to "Systems", systems_path, class: "nav-link #{request.path.start_with?('/systems') ? 'active' : ''}" %>
           </li>
           <li class="nav-item">
+            <%= link_to "Zones", zones_path, class: "nav-link #{request.path.start_with?('/zones') && !request.path.include?('/codeplugs/') ? 'active' : ''}" %>
+          </li>
+          <li class="nav-item">
             <%= link_to "Codeplugs", codeplugs_path, class: "nav-link #{request.path.start_with?('/codeplugs') ? 'active' : ''}" %>
           </li>
         <% end %>

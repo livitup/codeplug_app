@@ -1,4 +1,4 @@
-<%= form_with model: [ @codeplug, zone ] do |f| %>
+<%= form_with model: @codeplug ? [ @codeplug, zone ] : zone do |f| %>
   <% if zone.errors.any? %>
     <div class="alert alert-danger">
       <h5><%= pluralize(zone.errors.count, "error") %> prohibited this zone from being saved:</h5>
@@ -28,8 +28,22 @@
     <div class="form-text">Abbreviated name (for radios with limited display)</div>
   </div>
 
+  <% unless @codeplug %>
+    <div class="mb-3">
+      <div class="form-check">
+        <%= f.check_box :public, class: "form-check-input" %>
+        <%= f.label :public, "Make this zone public", class: "form-check-label" %>
+        <div class="form-text">Public zones can be viewed by all users. Private zones are only visible to you.</div>
+      </div>
+    </div>
+  <% end %>
+
   <div class="d-flex gap-2 mt-4">
     <%= f.submit class: "btn btn-primary" %>
-    <%= link_to "Cancel", zone.persisted? ? codeplug_zone_path(@codeplug, zone) : codeplug_zones_path(@codeplug), class: "btn btn-secondary" %>
+    <% if @codeplug %>
+      <%= link_to "Cancel", zone.persisted? ? codeplug_zone_path(@codeplug, zone) : codeplug_zones_path(@codeplug), class: "btn btn-secondary" %>
+    <% else %>
+      <%= link_to "Cancel", zone.persisted? ? zone_path(zone) : zones_path, class: "btn btn-secondary" %>
+    <% end %>
   </div>
 <% end %>

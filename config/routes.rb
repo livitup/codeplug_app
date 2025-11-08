@@ -31,8 +31,12 @@ Rails.application.routes.draw do
     resources :system_talk_groups, only: [ :create, :destroy ]
   end
 
+  # Standalone zones (new top-level resource)
+  resources :zones, only: [ :index, :show, :new, :create, :edit, :update, :destroy ]
+
   # Codeplugs and channels (nested)
   resources :codeplugs do
+    # Nested zones routes (kept for backward compatibility, will be deprecated)
     resources :zones do
       resources :channel_zones, only: [ :create, :destroy ]
       member do

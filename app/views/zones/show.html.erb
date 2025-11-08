@@ -2,15 +2,27 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><%= @zone.name %></h1>
     <div>
-      <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary me-2" %>
-      <%= button_to "Delete", codeplug_zone_path(@codeplug, @zone), method: :delete,
-          class: "btn btn-danger",
-          form: { class: "d-inline" },
-          data: { turbo_confirm: "Are you sure?" } %>
+      <% if @codeplug %>
+        <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary me-2" %>
+        <%= button_to "Delete", codeplug_zone_path(@codeplug, @zone), method: :delete,
+            class: "btn btn-danger",
+            form: { class: "d-inline" },
+            data: { turbo_confirm: "Are you sure?" } %>
+      <% elsif @zone.editable_by?(current_user) %>
+        <%= link_to "Edit", edit_zone_path(@zone), class: "btn btn-secondary me-2" %>
+        <%= button_to "Delete", zone_path(@zone), method: :delete,
+            class: "btn btn-danger",
+            form: { class: "d-inline" },
+            data: { turbo_confirm: "Are you sure?" } %>
+      <% end %>
     </div>
   </div>
 
-  <%= link_to "← Back to Zones", codeplug_zones_path(@codeplug), class: "btn btn-secondary mb-3" %>
+  <% if @codeplug %>
+    <%= link_to "← Back to Zones", codeplug_zones_path(@codeplug), class: "btn btn-secondary mb-3" %>
+  <% else %>
+    <%= link_to "← Back to Zones", zones_path, class: "btn btn-secondary mb-3" %>
+  <% end %>
 
   <div class="card mb-4">
     <div class="card-body">
@@ -27,68 +39,121 @@
           <strong>Short Name:</strong> <%= @zone.short_name || "—" %>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="card-title mb-0">Channels</h5>
-      </div>
-
-      <% if @available_channels.any? %>
-        <div class="card mb-3 bg-light">
-          <div class="card-body">
-            <%= form_with(model: @zone.channel_zones.new, url: codeplug_zone_channel_zones_path(@codeplug, @zone), method: :post, local: true, class: "row g-3") do |f| %>
-              <div class="col-auto flex-grow-1">
-                <%= f.select :channel_id,
-                    options_from_collection_for_select(@available_channels, :id, :long_name),
-                    { prompt: "Select a channel to add..." },
-                    { class: "form-select" } %>
-              </div>
-              <div class="col-auto">
-                <%= f.submit "Add Channel", class: "btn btn-primary" %>
-              </div>
+      <% unless @codeplug %>
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <strong>Owner:</strong> <%= @zone.user.email %>
+          </div>
+          <div class="col-md-4">
+            <strong>Visibility:</strong>
+            <% if @zone.public? %>
+              <span class="badge bg-success">Public</span>
+            <% else %>
+              <span class="badge bg-secondary">Private</span>
             <% end %>
           </div>
         </div>
       <% end %>
-
-      <% if @zone.channel_zones.any? %>
-        <p class="text-muted mb-3"><strong><%= pluralize(@zone.channel_zones.count, "channel") %></strong></p>
-        <div class="list-group"
-             data-controller="sortable"
-             data-sortable-url-value="<%= update_positions_codeplug_zone_path(@codeplug, @zone) %>">
-          <% @zone.channel_zones.order(:position).each do |channel_zone| %>
-            <div class="list-group-item" data-id="<%= channel_zone.id %>">
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center flex-grow-1">
-                  <span class="drag-handle me-3" style="cursor: grab;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
-                      <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                    </svg>
-                  </span>
-                  <div class="flex-grow-1">
-                    <strong><%= channel_zone.channel.long_name %></strong>
-                    <% if channel_zone.channel.system %>
-                      <span class="badge bg-info ms-2"><%= channel_zone.channel.system.mode.upcase %></span>
-                    <% end %>
-                  </div>
-                  <span class="badge bg-secondary me-2"><%= channel_zone.position %></span>
-                  <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, channel_zone.channel), class: "btn btn-sm btn-outline-secondary me-2" %>
-                  <%= button_to "Remove", codeplug_zone_channel_zone_path(@codeplug, @zone, channel_zone),
-                      method: :delete,
-                      class: "btn btn-sm btn-outline-danger",
-                      form: { class: "d-inline" },
-                      data: { turbo_confirm: "Remove this channel from the zone?" } %>
-                </div>
-              </div>
-            </div>
-          <% end %>
-        </div>
-      <% else %>
-        <p class="text-muted">No channels in this zone yet. <%= "Add channels using the form above." if @available_channels.any? %></p>
-      <% end %>
     </div>
   </div>
+
+  <% if @codeplug %>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0">Channels</h5>
+        </div>
+
+        <% if @available_channels.any? %>
+          <div class="card mb-3 bg-light">
+            <div class="card-body">
+              <%= form_with(model: @zone.channel_zones.new, url: codeplug_zone_channel_zones_path(@codeplug, @zone), method: :post, local: true, class: "row g-3") do |f| %>
+                <div class="col-auto flex-grow-1">
+                  <%= f.select :channel_id,
+                      options_from_collection_for_select(@available_channels, :id, :long_name),
+                      { prompt: "Select a channel to add..." },
+                      { class: "form-select" } %>
+                </div>
+                <div class="col-auto">
+                  <%= f.submit "Add Channel", class: "btn btn-primary" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @zone.channel_zones.any? %>
+          <p class="text-muted mb-3"><strong><%= pluralize(@zone.channel_zones.count, "channel") %></strong></p>
+          <div class="list-group"
+               data-controller="sortable"
+               data-sortable-url-value="<%= update_positions_codeplug_zone_path(@codeplug, @zone) %>">
+            <% @zone.channel_zones.order(:position).each do |channel_zone| %>
+              <div class="list-group-item" data-id="<%= channel_zone.id %>">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center flex-grow-1">
+                    <span class="drag-handle me-3" style="cursor: grab;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
+                        <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                      </svg>
+                    </span>
+                    <div class="flex-grow-1">
+                      <strong><%= channel_zone.channel.long_name %></strong>
+                      <% if channel_zone.channel.system %>
+                        <span class="badge bg-info ms-2"><%= channel_zone.channel.system.mode.upcase %></span>
+                      <% end %>
+                    </div>
+                    <span class="badge bg-secondary me-2"><%= channel_zone.position %></span>
+                    <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, channel_zone.channel), class: "btn btn-sm btn-outline-secondary me-2" %>
+                    <%= button_to "Remove", codeplug_zone_channel_zone_path(@codeplug, @zone, channel_zone),
+                        method: :delete,
+                        class: "btn btn-sm btn-outline-danger",
+                        form: { class: "d-inline" },
+                        data: { turbo_confirm: "Remove this channel from the zone?" } %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted">No channels in this zone yet. <%= "Add channels using the form above." if @available_channels.any? %></p>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <%# Standalone zone view - show systems %>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-title mb-0">Systems</h5>
+        </div>
+
+        <% if @zone_systems.any? %>
+          <p class="text-muted mb-3"><strong><%= pluralize(@zone_systems.count, "system") %></strong></p>
+          <div class="list-group">
+            <% @zone_systems.each do |zone_system| %>
+              <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="flex-grow-1">
+                    <strong><%= zone_system.system.name %></strong>
+                    <span class="badge bg-info ms-2"><%= zone_system.system.mode.upcase %></span>
+                    <br>
+                    <small class="text-muted">
+                      <%= zone_system.system.rx_frequency %> MHz
+                      <% if zone_system.system.tx_frequency != zone_system.system.rx_frequency %>
+                        / <%= zone_system.system.tx_frequency %> MHz
+                      <% end %>
+                    </small>
+                  </div>
+                  <span class="badge bg-secondary"><%= zone_system.position %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted">No systems in this zone yet.</p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
 </div>

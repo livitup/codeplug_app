@@ -1,10 +1,16 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Zones</h1>
-    <%= link_to "New Zone", new_codeplug_zone_path(@codeplug), class: "btn btn-primary" %>
+    <% if @codeplug %>
+      <%= link_to "New Zone", new_codeplug_zone_path(@codeplug), class: "btn btn-primary" %>
+    <% else %>
+      <%= link_to "New Zone", new_zone_path, class: "btn btn-primary" %>
+    <% end %>
   </div>
 
-  <%= link_to "← Back to Codeplug", codeplug_path(@codeplug), class: "btn btn-secondary mb-3" %>
+  <% if @codeplug %>
+    <%= link_to "← Back to Codeplug", codeplug_path(@codeplug), class: "btn btn-secondary mb-3" %>
+  <% end %>
 
   <% if @zones.any? %>
     <div class="table-responsive">
@@ -14,24 +20,63 @@
             <th>Name</th>
             <th>Long Name</th>
             <th>Short Name</th>
-            <th>Channels</th>
+            <% unless @codeplug %>
+              <th>Owner</th>
+              <th>Visibility</th>
+              <th>Systems</th>
+            <% else %>
+              <th>Channels</th>
+            <% end %>
             <th class="text-end">Actions</th>
           </tr>
         </thead>
         <tbody>
           <% @zones.each do |zone| %>
             <tr>
-              <td><%= link_to zone.name, codeplug_zone_path(@codeplug, zone) %></td>
+              <% if @codeplug %>
+                <td><%= link_to zone.name, codeplug_zone_path(@codeplug, zone) %></td>
+              <% else %>
+                <td><%= link_to zone.name, zone_path(zone) %></td>
+              <% end %>
               <td><%= zone.long_name || "—" %></td>
               <td><%= zone.short_name || "—" %></td>
-              <td><span class="badge bg-secondary"><%= zone.channels.count %></span></td>
+              <% if @codeplug %>
+                <td><span class="badge bg-secondary"><%= zone.channels.count %></span></td>
+              <% else %>
+                <td>
+                  <% if zone.user == current_user %>
+                    <span class="text-muted">You</span>
+                  <% else %>
+                    <%= zone.user.email %>
+                  <% end %>
+                </td>
+                <td>
+                  <% if zone.public? %>
+                    <span class="badge bg-success">Public</span>
+                  <% else %>
+                    <span class="badge bg-secondary">Private</span>
+                  <% end %>
+                </td>
+                <td><span class="badge bg-info"><%= zone.zone_systems.count %></span></td>
+              <% end %>
               <td class="text-end text-nowrap">
-                <%= link_to "View", codeplug_zone_path(@codeplug, zone), class: "btn btn-sm btn-info me-1" %>
-                <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, zone), class: "btn btn-sm btn-secondary me-1" %>
-                <%= button_to "Delete", codeplug_zone_path(@codeplug, zone), method: :delete,
-                    class: "btn btn-sm btn-danger",
-                    form: { class: "d-inline" },
-                    data: { turbo_confirm: "Are you sure?" } %>
+                <% if @codeplug %>
+                  <%= link_to "View", codeplug_zone_path(@codeplug, zone), class: "btn btn-sm btn-info me-1" %>
+                  <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, zone), class: "btn btn-sm btn-secondary me-1" %>
+                  <%= button_to "Delete", codeplug_zone_path(@codeplug, zone), method: :delete,
+                      class: "btn btn-sm btn-danger",
+                      form: { class: "d-inline" },
+                      data: { turbo_confirm: "Are you sure?" } %>
+                <% else %>
+                  <%= link_to "View", zone_path(zone), class: "btn btn-sm btn-info me-1" %>
+                  <% if zone.editable_by?(current_user) %>
+                    <%= link_to "Edit", edit_zone_path(zone), class: "btn btn-sm btn-secondary me-1" %>
+                    <%= button_to "Delete", zone_path(zone), method: :delete,
+                        class: "btn btn-sm btn-danger",
+                        form: { class: "d-inline" },
+                        data: { turbo_confirm: "Are you sure?" } %>
+                  <% end %>
+                <% end %>
               </td>
             </tr>
           <% end %>
@@ -40,7 +85,11 @@
     </div>
   <% else %>
     <div class="alert alert-info">
-      No zones found. <%= link_to "Create the first one", new_codeplug_zone_path(@codeplug), class: "alert-link" %>.
+      <% if @codeplug %>
+        No zones found. <%= link_to "Create the first one", new_codeplug_zone_path(@codeplug), class: "alert-link" %>.
+      <% else %>
+        No zones found. <%= link_to "Create the first one", new_zone_path, class: "alert-link" %>.
+      <% end %>
     </div>
   <% end %>
 </div>
