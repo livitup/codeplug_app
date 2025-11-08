@@ -1,7 +1,11 @@
 <div class="container mt-4">
   <h1>Edit Zone - <%= @zone.name %></h1>
 
-  <%= link_to "← Back to Zone", codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary mb-3" %>
+  <% if @codeplug %>
+    <%= link_to "← Back to Zone", codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary mb-3" %>
+  <% else %>
+    <%= link_to "← Back to Zone", zone_path(@zone), class: "btn btn-secondary mb-3" %>
+  <% end %>
 
   <div class="card">
     <div class="card-body">

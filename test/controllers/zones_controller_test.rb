@@ -292,4 +292,157 @@ class ZonesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to login_path
   end
+
+  # Standalone Zones Routes Tests (new top-level resource)
+  # These tests are for the new standalone zones functionality (not nested under codeplugs)
+
+  test "standalone index should show user's zones and public zones" do
+    log_in_as(@user)
+
+    # Create test data
+    my_public_zone = create(:zone, user: @user, public: true, name: "My Public Zone")
+    my_private_zone = create(:zone, user: @user, public: false, name: "My Private Zone")
+    other_public_zone = create(:zone, user: @other_user, public: true, name: "Other Public Zone")
+    other_private_zone = create(:zone, user: @other_user, public: false, name: "Other Private Zone")
+
+    get zones_path
+
+    assert_response :success
+    # Should see own zones (both public and private)
+    assert_select "body", text: /My Public Zone/
+    assert_select "body", text: /My Private Zone/
+    # Should see other users' public zones
+    assert_select "body", text: /Other Public Zone/
+    # Should NOT see other users' private zones
+    assert_select "body", { text: /Other Private Zone/, count: 0 }
+  end
+
+  test "standalone index should require login" do
+    get zones_path
+    assert_redirected_to login_path
+  end
+
+  test "standalone show should display public zone to any user" do
+    log_in_as(@user)
+    public_zone = create(:zone, user: @other_user, public: true, name: "Public Zone")
+
+    get zone_path(public_zone)
+
+    assert_response :success
+    assert_select "h1", "Public Zone"
+  end
+
+  test "standalone show should display own private zone" do
+    log_in_as(@user)
+    my_private_zone = create(:zone, user: @user, public: false, name: "My Private Zone")
+
+    get zone_path(my_private_zone)
+
+    assert_response :success
+    assert_select "h1", "My Private Zone"
+  end
+
+  test "standalone show should not display other user's private zone" do
+    log_in_as(@user)
+    other_private_zone = create(:zone, user: @other_user, public: false, name: "Private Zone")
+
+    get zone_path(other_private_zone)
+
+    assert_response :forbidden
+  end
+
+  test "standalone show should require login" do
+    public_zone = create(:zone, user: @user, public: true)
+
+    get zone_path(public_zone)
+
+    assert_redirected_to login_path
+  end
+
+  test "standalone new should require login" do
+    get new_zone_path
+    assert_redirected_to login_path
+  end
+
+  test "standalone create should create zone for logged in user" do
+    log_in_as(@user)
+
+    assert_difference("Zone.count", 1) do
+      post zones_path, params: {
+        zone: {
+          name: "New Standalone Zone",
+          long_name: "New Standalone Zone Long",
+          short_name: "NSZ",
+          public: false
+        }
+      }
+    end
+
+    zone = Zone.last
+    assert_equal @user, zone.user
+    assert_equal "New Standalone Zone", zone.name
+    assert_redirected_to zone_path(zone)
+  end
+
+  test "standalone create should require login" do
+    assert_no_difference("Zone.count") do
+      post zones_path, params: {
+        zone: {
+          name: "New Zone"
+        }
+      }
+    end
+
+    assert_redirected_to login_path
+  end
+
+  test "standalone update should update own zone" do
+    log_in_as(@user)
+    my_zone = create(:zone, user: @user, name: "Original Name")
+
+    patch zone_path(my_zone), params: {
+      zone: {
+        name: "Updated Name"
+      }
+    }
+
+    assert_equal "Updated Name", my_zone.reload.name
+    assert_redirected_to zone_path(my_zone)
+  end
+
+  test "standalone update should not update other user's zone" do
+    log_in_as(@user)
+    other_zone = create(:zone, user: @other_user, name: "Original Name")
+
+    patch zone_path(other_zone), params: {
+      zone: {
+        name: "Hacked Name"
+      }
+    }
+
+    assert_equal "Original Name", other_zone.reload.name
+    assert_response :forbidden
+  end
+
+  test "standalone destroy should delete own zone" do
+    log_in_as(@user)
+    my_zone = create(:zone, user: @user)
+
+    assert_difference("Zone.count", -1) do
+      delete zone_path(my_zone)
+    end
+
+    assert_redirected_to zones_path
+  end
+
+  test "standalone destroy should not delete other user's zone" do
+    log_in_as(@user)
+    other_zone = create(:zone, user: @other_user)
+
+    assert_no_difference("Zone.count") do
+      delete zone_path(other_zone)
+    end
+
+    assert_response :forbidden
+  end
 end
