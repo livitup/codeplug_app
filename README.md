@@ -399,6 +399,49 @@ yarn install
 bin/dev
 ```
 
+### Node.js Deprecation Warnings
+
+You may see deprecation warnings like:
+
+```
+DeprecationWarning: `url.parse()` behavior is not standardized...
+```
+
+This warning comes from Yarn v1 (Classic), which uses the deprecated `url.parse()` API. **This does not affect functionality** but can be eliminated by upgrading to a modern package manager:
+
+**Option 1: Upgrade to Yarn v4 (Recommended)**
+```bash
+# Enable Corepack (comes with Node.js 16.10+)
+corepack enable
+
+# Upgrade to Yarn v4
+yarn set version stable
+
+# Reinstall dependencies
+yarn install
+```
+
+**Option 2: Switch to npm**
+```bash
+# Remove yarn.lock
+rm yarn.lock
+
+# Install with npm
+npm install
+```
+
+**Option 3: Switch to pnpm**
+```bash
+# Install pnpm
+npm install -g pnpm
+
+# Remove yarn.lock
+rm yarn.lock
+
+# Install with pnpm
+pnpm install
+```
+
 ## Documentation
 
 - [Data Models Documentation](docs/MODELS.md) - Complete model specifications
