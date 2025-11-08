@@ -240,4 +240,56 @@ class ZonesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to login_path
   end
+
+  # Update Positions Action Tests
+  test "should update channel positions for own zone" do
+    log_in_as(@user)
+    system = create(:system)
+    channel1 = create(:channel, codeplug: @codeplug, system: system, long_name: "Channel 1")
+    channel2 = create(:channel, codeplug: @codeplug, system: system, long_name: "Channel 2")
+    channel3 = create(:channel, codeplug: @codeplug, system: system, long_name: "Channel 3")
+
+    cz1 = create(:channel_zone, zone: @zone, channel: channel1, position: 1)
+    cz2 = create(:channel_zone, zone: @zone, channel: channel2, position: 2)
+    cz3 = create(:channel_zone, zone: @zone, channel: channel3, position: 3)
+
+    # Reorder: move channel3 to position 1
+    patch update_positions_codeplug_zone_path(@codeplug, @zone), params: {
+      positions: [
+        { id: cz3.id, position: 1 },
+        { id: cz1.id, position: 2 },
+        { id: cz2.id, position: 3 }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    # Verify positions updated
+    assert_equal 1, cz3.reload.position
+    assert_equal 2, cz1.reload.position
+    assert_equal 3, cz2.reload.position
+  end
+
+  test "should not update positions for other user's zone" do
+    log_in_as(@user)
+    system = create(:system)
+    channel = create(:channel, codeplug: @other_codeplug, system: system)
+    cz = create(:channel_zone, zone: @other_zone, channel: channel, position: 1)
+
+    patch update_positions_codeplug_zone_path(@other_codeplug, @other_zone), params: {
+      positions: [
+        { id: cz.id, position: 2 }
+      ]
+    }, as: :json
+
+    assert_redirected_to codeplugs_path
+  end
+
+  test "should require login for update_positions" do
+    patch update_positions_codeplug_zone_path(@codeplug, @zone), params: {
+      positions: []
+    }, as: :json
+
+    assert_redirected_to login_path
+  end
 end

@@ -95,14 +95,15 @@ class ChannelZoneTest < ActiveSupport::TestCase
     assert cz2.save, "Failed to save channel_zone with same position in different zone"
   end
 
-  test "should save same channel at different positions in same zone" do
+  test "should not save duplicate channel in same zone" do
     zone = create(:zone)
     channel = create(:channel)
 
     cz1 = create(:channel_zone, zone: zone, channel: channel, position: 1)
     cz2 = build(:channel_zone, zone: zone, channel: channel, position: 2)
 
-    assert cz2.save, "Failed to save same channel at different positions in same zone"
+    assert_not cz2.save, "Should not allow same channel in zone twice"
+    assert_includes cz2.errors[:channel_id], "is already in this zone"
   end
 
   test "should save same channel at same position in different zones" do
