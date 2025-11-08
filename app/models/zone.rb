@@ -16,4 +16,17 @@ class Zone < ApplicationRecord
   # Scopes
   scope :publicly_visible, -> { where(public: true) }
   scope :owned_by, ->(user) { where(user: user) }
+  scope :available_to_user, ->(user) { where(public: true).or(where(user: user)) }
+
+  # Authorization methods
+  def editable_by?(user)
+    return false if user.nil?
+    self.user == user
+  end
+
+  def viewable_by?(user)
+    return true if public?
+    return false if user.nil?
+    self.user == user
+  end
 end
