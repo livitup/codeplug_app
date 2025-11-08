@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_08_032416) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -58,6 +58,18 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
     t.index ["radio_model_id", "name"], name: "index_codeplug_layouts_on_radio_model_id_and_name"
     t.index ["radio_model_id"], name: "index_codeplug_layouts_on_radio_model_id"
     t.index ["user_id"], name: "index_codeplug_layouts_on_user_id"
+  end
+
+  create_table "codeplug_zones", force: :cascade do |t|
+    t.bigint "codeplug_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "position", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "zone_id", null: false
+    t.index ["codeplug_id", "position"], name: "index_codeplug_zones_on_codeplug_id_and_position", unique: true
+    t.index ["codeplug_id", "zone_id"], name: "index_codeplug_zones_on_codeplug_id_and_zone_id", unique: true
+    t.index ["codeplug_id"], name: "index_codeplug_zones_on_codeplug_id"
+    t.index ["zone_id"], name: "index_codeplug_zones_on_zone_id"
   end
 
   create_table "codeplugs", force: :cascade do |t|
@@ -184,6 +196,28 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  create_table "zone_system_talk_groups", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "system_talk_group_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "zone_system_id", null: false
+    t.index ["system_talk_group_id"], name: "index_zone_system_talk_groups_on_system_talk_group_id"
+    t.index ["zone_system_id", "system_talk_group_id"], name: "index_zstg_on_zone_system_and_system_talk_group", unique: true
+    t.index ["zone_system_id"], name: "index_zone_system_talk_groups_on_zone_system_id"
+  end
+
+  create_table "zone_systems", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "position", null: false
+    t.bigint "system_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "zone_id", null: false
+    t.index ["system_id"], name: "index_zone_systems_on_system_id"
+    t.index ["zone_id", "position"], name: "index_zone_systems_on_zone_id_and_position", unique: true
+    t.index ["zone_id", "system_id"], name: "index_zone_systems_on_zone_id_and_system_id", unique: true
+    t.index ["zone_id"], name: "index_zone_systems_on_zone_id"
+  end
+
   create_table "zones", force: :cascade do |t|
     t.bigint "codeplug_id", null: false
     t.datetime "created_at", null: false
@@ -201,6 +235,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
   add_foreign_key "channels", "systems"
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
+  add_foreign_key "codeplug_zones", "codeplugs"
+  add_foreign_key "codeplug_zones", "zones"
   add_foreign_key "codeplugs", "users"
   add_foreign_key "radio_models", "manufacturers"
   add_foreign_key "system_networks", "networks"
@@ -208,5 +244,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_03_015043) do
   add_foreign_key "system_talk_groups", "systems"
   add_foreign_key "system_talk_groups", "talk_groups"
   add_foreign_key "talk_groups", "networks"
+  add_foreign_key "zone_system_talk_groups", "system_talk_groups"
+  add_foreign_key "zone_system_talk_groups", "zone_systems"
+  add_foreign_key "zone_systems", "systems"
+  add_foreign_key "zone_systems", "zones"
   add_foreign_key "zones", "codeplugs"
 end
