@@ -7,10 +7,15 @@ class ZoneTest < ActiveSupport::TestCase
     assert zone.save, "Failed to save zone with valid attributes"
   end
 
-  test "should not save zone without codeplug" do
+  test "should save zone without codeplug (codeplug is now optional)" do
     zone = build(:zone, codeplug: nil)
-    assert_not zone.save, "Saved zone without codeplug"
-    assert_includes zone.errors[:codeplug], "must exist"
+    assert zone.save, "Failed to save zone without codeplug"
+  end
+
+  test "should not save zone without user" do
+    zone = build(:zone, user: nil)
+    assert_not zone.save, "Saved zone without user"
+    assert_includes zone.errors[:user], "must exist"
   end
 
   test "should not save zone without name" do
@@ -126,5 +131,72 @@ class ZoneTest < ActiveSupport::TestCase
   test "should store short short_name" do
     zone = create(:zone, short_name: "AB")
     assert_equal "AB", zone.short_name
+  end
+
+  # User Association Tests
+  test "should belong to user" do
+    zone = build(:zone)
+    assert_respond_to zone, :user
+  end
+
+  test "user association should be configured" do
+    association = Zone.reflect_on_association(:user)
+    assert_not_nil association, "user association should exist"
+    assert_equal :belongs_to, association.macro
+  end
+
+  # Public Flag Tests
+  test "public should default to false" do
+    zone = create(:zone)
+    assert_equal false, zone.public
+  end
+
+  test "should save zone as public" do
+    zone = create(:zone, public: true)
+    assert zone.public
+  end
+
+  test "should save zone as private" do
+    zone = create(:zone, public: false)
+    assert_not zone.public
+  end
+
+  # Scope Tests
+  test "publicly_visible scope should return public zones" do
+    public_zone = create(:zone, public: true)
+    private_zone = create(:zone, public: false)
+
+    public_zones = Zone.publicly_visible
+    assert_includes public_zones, public_zone
+    assert_not_includes public_zones, private_zone
+  end
+
+  test "owned_by scope should return zones for specific user" do
+    user1 = create(:user)
+    user2 = create(:user)
+    zone1 = create(:zone, user: user1)
+    zone2 = create(:zone, user: user2)
+
+    user1_zones = Zone.owned_by(user1)
+    assert_includes user1_zones, zone1
+    assert_not_includes user1_zones, zone2
+  end
+
+  # Multi-user Tests
+  test "different users can create zones with same name" do
+    user1 = create(:user)
+    user2 = create(:user)
+    zone1 = create(:zone, user: user1, name: "Zone A")
+    zone2 = create(:zone, user: user2, name: "Zone A")
+
+    assert zone1.persisted?
+    assert zone2.persisted?
+  end
+
+  # Codeplug Optional Tests
+  test "zone can exist without being associated to a codeplug" do
+    zone = create(:zone, codeplug: nil)
+    assert_nil zone.codeplug
+    assert zone.persisted?
   end
 end
