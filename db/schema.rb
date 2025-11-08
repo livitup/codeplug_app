@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_08_032416) do
+ActiveRecord::Schema[8.1].define(version: 2025_11_08_033129) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -219,13 +219,16 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_08_032416) do
   end
 
   create_table "zones", force: :cascade do |t|
-    t.bigint "codeplug_id", null: false
+    t.bigint "codeplug_id"
     t.datetime "created_at", null: false
     t.string "long_name"
     t.string "name", null: false
+    t.boolean "public", default: false, null: false
     t.string "short_name"
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
     t.index ["codeplug_id"], name: "index_zones_on_codeplug_id"
+    t.index ["user_id"], name: "index_zones_on_user_id"
   end
 
   add_foreign_key "channel_zones", "channels"
@@ -249,4 +252,5 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_08_032416) do
   add_foreign_key "zone_systems", "systems"
   add_foreign_key "zone_systems", "zones"
   add_foreign_key "zones", "codeplugs"
+  add_foreign_key "zones", "users"
 end

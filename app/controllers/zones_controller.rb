@@ -27,6 +27,7 @@ class ZonesController < ApplicationController
 
   def create
     @zone = @codeplug.zones.new(zone_params)
+    @zone.user = current_user
 
     if @zone.save
       redirect_to codeplug_zone_path(@codeplug, @zone), notice: "Zone was successfully created."

@@ -1,6 +1,7 @@
 class Zone < ApplicationRecord
   # Associations
-  belongs_to :codeplug
+  belongs_to :user
+  belongs_to :codeplug, optional: true
   has_many :channel_zones, dependent: :destroy
   has_many :channels, through: :channel_zones
   has_many :codeplug_zones, dependent: :destroy
@@ -10,4 +11,9 @@ class Zone < ApplicationRecord
 
   # Validations
   validates :name, presence: true
+  validates :user, presence: true
+
+  # Scopes
+  scope :publicly_visible, -> { where(public: true) }
+  scope :owned_by, ->(user) { where(user: user) }
 end
