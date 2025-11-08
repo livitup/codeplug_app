@@ -33,6 +33,16 @@ export default class extends Controller {
         "X-CSRF-Token": document.querySelector("[name='csrf-token']").content
       },
       body: JSON.stringify({ positions: items })
+    }).then(response => {
+      if (response.ok) {
+        // Update position badges in the UI
+        this.element.querySelectorAll('.list-group-item').forEach((item, index) => {
+          const badge = item.querySelector('.badge.bg-secondary')
+          if (badge) {
+            badge.textContent = index + 1
+          }
+        })
+      }
     })
   }
 
