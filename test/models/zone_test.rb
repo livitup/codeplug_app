@@ -182,6 +182,83 @@ class ZoneTest < ActiveSupport::TestCase
     assert_not_includes user1_zones, zone2
   end
 
+  test "available_to_user scope should return public zones and user's private zones" do
+    user1 = create(:user)
+    user2 = create(:user)
+
+    # User1's zones
+    user1_public_zone = create(:zone, user: user1, public: true, name: "User1 Public")
+    user1_private_zone = create(:zone, user: user1, public: false, name: "User1 Private")
+
+    # User2's zones
+    user2_public_zone = create(:zone, user: user2, public: true, name: "User2 Public")
+    user2_private_zone = create(:zone, user: user2, public: false, name: "User2 Private")
+
+    # User1 should see: their own zones (public + private) + other users' public zones
+    available_zones = Zone.available_to_user(user1)
+    assert_includes available_zones, user1_public_zone
+    assert_includes available_zones, user1_private_zone
+    assert_includes available_zones, user2_public_zone
+    assert_not_includes available_zones, user2_private_zone
+  end
+
+  # Authorization Method Tests
+  test "editable_by? should return true for zone owner" do
+    user = create(:user)
+    zone = create(:zone, user: user)
+
+    assert zone.editable_by?(user), "Owner should be able to edit their zone"
+  end
+
+  test "editable_by? should return false for non-owner" do
+    owner = create(:user)
+    other_user = create(:user)
+    zone = create(:zone, user: owner)
+
+    assert_not zone.editable_by?(other_user), "Non-owner should not be able to edit zone"
+  end
+
+  test "editable_by? should return false for nil user" do
+    zone = create(:zone)
+
+    assert_not zone.editable_by?(nil), "Nil user should not be able to edit zone"
+  end
+
+  test "viewable_by? should return true for public zone by any user" do
+    owner = create(:user)
+    other_user = create(:user)
+    public_zone = create(:zone, user: owner, public: true)
+
+    assert public_zone.viewable_by?(other_user), "Public zone should be viewable by anyone"
+  end
+
+  test "viewable_by? should return true for private zone by owner" do
+    user = create(:user)
+    private_zone = create(:zone, user: user, public: false)
+
+    assert private_zone.viewable_by?(user), "Owner should be able to view their private zone"
+  end
+
+  test "viewable_by? should return false for private zone by non-owner" do
+    owner = create(:user)
+    other_user = create(:user)
+    private_zone = create(:zone, user: owner, public: false)
+
+    assert_not private_zone.viewable_by?(other_user), "Non-owner should not view private zone"
+  end
+
+  test "viewable_by? should return true for public zone by nil user" do
+    public_zone = create(:zone, public: true)
+
+    assert public_zone.viewable_by?(nil), "Public zone should be viewable by unauthenticated user"
+  end
+
+  test "viewable_by? should return false for private zone by nil user" do
+    private_zone = create(:zone, public: false)
+
+    assert_not private_zone.viewable_by?(nil), "Private zone should not be viewable by unauthenticated user"
+  end
+
   # Multi-user Tests
   test "different users can create zones with same name" do
     user1 = create(:user)
