@@ -1,3 +1,5 @@
+<% system_modes = @systems.each_with_object({}) { |s, h| h[s.id] = s.mode } %>
+
 <%= form_with model: [ @codeplug, channel ], local: true do |f| %>
   <% if channel.errors.any? %>
     <div class="alert alert-danger">
@@ -32,7 +34,7 @@
   </div>
 
   <h5 class="mt-4 mb-3">System Configuration</h5>
-  <div class="row">
+  <div class="row" id="system-configuration" data-system-modes="<%= system_modes.to_json %>">
     <div class="col-md-6 mb-3">
       <%= f.label :system_id, "System", class: "form-label" %>
       <%= f.collection_select :system_id, @systems, :id, :name,
@@ -41,7 +43,7 @@
       <div class="form-text">Select the system/repeater this channel uses</div>
     </div>
 
-    <div class="col-md-6 mb-3" id="talkgroup-field">
+    <div class="col-md-6 mb-3" id="talkgroup-field" style="display: <%= channel.system&.mode == 'analog' || channel.system.nil? ? 'none' : 'block' %>;">
       <%= f.label :system_talk_group_id, "Talkgroup (Digital Only)", class: "form-label" %>
       <%= f.collection_select :system_talk_group_id, @system_talk_groups, :id, ->(stg) { "#{stg.talk_group.name} (TS#{stg.timeslot || 'N/A'})" },
           { prompt: "Select a talkgroup", include_blank: true },
@@ -103,3 +105,40 @@
     <%= link_to "Cancel", channel.persisted? ? codeplug_channel_path(@codeplug, channel) : codeplug_channels_path(@codeplug), class: "btn btn-secondary" %>
   </div>
 <% end %>
+
+<script>
+  // Show/hide talkgroup field based on selected system's mode
+  document.addEventListener('turbo:load', function() {
+    const systemSelect = document.querySelector('#channel_system_id');
+    if (!systemSelect) return; // Exit if not on channel form
+
+    const talkgroupField = document.querySelector('#talkgroup-field');
+    const systemConfigEl = document.querySelector('#system-configuration');
+    if (!talkgroupField || !systemConfigEl) return;
+
+    const systemModes = JSON.parse(systemConfigEl.dataset.systemModes || '{}');
+
+    function updateTalkgroupVisibility() {
+      const selectedSystemId = systemSelect.value;
+
+      if (!selectedSystemId) {
+        // No system selected - hide talkgroup field
+        talkgroupField.style.display = 'none';
+        return;
+      }
+
+      const mode = systemModes[selectedSystemId];
+      if (mode === 'analog') {
+        talkgroupField.style.display = 'none';
+      } else {
+        talkgroupField.style.display = 'block';
+      }
+    }
+
+    // Run on page load
+    updateTalkgroupVisibility();
+
+    // Run when system dropdown changes
+    systemSelect.addEventListener('change', updateTalkgroupVisibility);
+  });
+</script>
