@@ -1,6 +1,7 @@
 class System < ApplicationRecord
   # Constants
   MODES = [ "analog", "dmr", "p25", "nxdn" ].freeze
+  BANDWIDTHS = [ "12.5 kHz", "20 kHz", "25 kHz" ].freeze
 
   # Associations
   belongs_to :mode_detail, polymorphic: true, optional: true

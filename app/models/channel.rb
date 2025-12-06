@@ -2,6 +2,7 @@ class Channel < ApplicationRecord
   # Constants for enums
   TONE_MODES = [ "none", "tx_only", "rx_only", "tx_rx" ].freeze
   TRANSMIT_PERMISSIONS = [ "allow", "forbid_tx" ].freeze
+  BANDWIDTHS = [ "12.5 kHz", "20 kHz", "25 kHz" ].freeze
 
   # Associations
   belongs_to :codeplug
