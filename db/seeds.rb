@@ -16,9 +16,9 @@ if Rails.env.development?
     u.default_power_level = "medium"
     u.measurement_preference = "imperial"
   end
-  puts "✓ Created seed user: #{user.email}"
+  puts "Created seed user: #{user.email}"
 
-  # Create manufacturers
+  # Create system manufacturers (read-only, shared with all users)
   manufacturers_data = [
     "Motorola",
     "Baofeng",
@@ -33,11 +33,15 @@ if Rails.env.development?
   ]
 
   manufacturers = manufacturers_data.map do |name|
-    Manufacturer.find_or_create_by!(name: name)
+    manufacturer = Manufacturer.find_or_initialize_by(name: name)
+    manufacturer.system_record = true
+    manufacturer.user_id = nil
+    manufacturer.save!
+    manufacturer
   end
-  puts "✓ Created #{manufacturers.count} manufacturers"
+  puts "Created #{manufacturers.count} system manufacturers"
 
-  # Create radio models
+  # Create system radio models (read-only, shared with all users)
   radio_models_data = [
     # Motorola DMR radios
     {
@@ -203,18 +207,20 @@ if Rails.env.development?
 
   radio_models_data.each do |data|
     manufacturer = Manufacturer.find_by!(name: data[:manufacturer])
-    RadioModel.find_or_create_by!(manufacturer: manufacturer, name: data[:name]) do |rm|
-      rm.supported_modes = data[:supported_modes]
-      rm.max_zones = data[:max_zones]
-      rm.max_channels_per_zone = data[:max_channels_per_zone]
-      rm.long_channel_name_length = data[:long_channel_name_length]
-      rm.short_channel_name_length = data[:short_channel_name_length]
-      rm.long_zone_name_length = data[:long_zone_name_length]
-      rm.short_zone_name_length = data[:short_zone_name_length]
-      rm.frequency_ranges = data[:frequency_ranges]
-    end
+    radio_model = RadioModel.find_or_initialize_by(manufacturer: manufacturer, name: data[:name])
+    radio_model.supported_modes = data[:supported_modes]
+    radio_model.max_zones = data[:max_zones]
+    radio_model.max_channels_per_zone = data[:max_channels_per_zone]
+    radio_model.long_channel_name_length = data[:long_channel_name_length]
+    radio_model.short_channel_name_length = data[:short_channel_name_length]
+    radio_model.long_zone_name_length = data[:long_zone_name_length]
+    radio_model.short_zone_name_length = data[:short_zone_name_length]
+    radio_model.frequency_ranges = data[:frequency_ranges]
+    radio_model.system_record = true
+    radio_model.user_id = nil
+    radio_model.save!
   end
-  puts "✓ Created #{radio_models_data.count} radio models"
+  puts "Created #{radio_models_data.count} system radio models"
 
   puts "\n=== Seed data complete ==="
   puts "Login with: dev@example.com / password123"

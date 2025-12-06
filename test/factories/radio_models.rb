@@ -15,5 +15,17 @@ FactoryBot.define do
         { band: "70cm", min: 420.0, max: 450.0 }
       ]
     end
+    system_record { false }
+    user { nil }
+
+    trait :system do
+      system_record { true }
+      user { nil }
+    end
+
+    trait :user_owned do
+      system_record { false }
+      association :user
+    end
   end
 end

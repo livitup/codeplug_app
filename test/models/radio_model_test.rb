@@ -128,4 +128,98 @@ class RadioModelTest < ActiveSupport::TestCase
     radio_model.reload
     assert_equal modes, radio_model.supported_modes
   end
+
+  # User Association Tests
+  test "should belong to user" do
+    user = create(:user)
+    radio_model = create(:radio_model, :user_owned, user: user)
+    assert_equal user, radio_model.user
+  end
+
+  test "should allow nil user for system records" do
+    radio_model = create(:radio_model, :system)
+    assert_nil radio_model.user
+    assert radio_model.system_record?
+  end
+
+  # System Record Tests
+  test "system_record defaults to false" do
+    radio_model = build(:radio_model)
+    assert_equal false, radio_model.system_record
+  end
+
+  test "system records have no user" do
+    radio_model = create(:radio_model, :system)
+    assert radio_model.system_record?
+    assert_nil radio_model.user_id
+  end
+
+  test "user-owned records have user and system_record false" do
+    user = create(:user)
+    radio_model = create(:radio_model, :user_owned, user: user)
+    assert_not radio_model.system_record?
+    assert_equal user, radio_model.user
+  end
+
+  # Scope Tests
+  test "system scope returns only system records" do
+    system_model = create(:radio_model, :system, name: "System Model")
+    user = create(:user)
+    user_model = create(:radio_model, :user_owned, user: user, name: "User Model")
+
+    system_records = RadioModel.system
+    assert_includes system_records, system_model
+    assert_not_includes system_records, user_model
+  end
+
+  test "user_owned scope returns records for specific user" do
+    user1 = create(:user)
+    user2 = create(:user)
+    model1 = create(:radio_model, :user_owned, user: user1, name: "User1 Model")
+    model2 = create(:radio_model, :user_owned, user: user2, name: "User2 Model")
+    system_model = create(:radio_model, :system, name: "System Model")
+
+    user1_records = RadioModel.user_owned(user1)
+    assert_includes user1_records, model1
+    assert_not_includes user1_records, model2
+    assert_not_includes user1_records, system_model
+  end
+
+  test "visible_to scope returns system records and user's own records" do
+    user1 = create(:user)
+    user2 = create(:user)
+    system_model = create(:radio_model, :system, name: "System Model")
+    user1_model = create(:radio_model, :user_owned, user: user1, name: "User1 Model")
+    user2_model = create(:radio_model, :user_owned, user: user2, name: "User2 Model")
+
+    visible_to_user1 = RadioModel.visible_to(user1)
+    assert_includes visible_to_user1, system_model
+    assert_includes visible_to_user1, user1_model
+    assert_not_includes visible_to_user1, user2_model
+  end
+
+  # Authorization Method Tests
+  test "editable_by? returns false for system records" do
+    user = create(:user)
+    radio_model = create(:radio_model, :system)
+    assert_not radio_model.editable_by?(user)
+  end
+
+  test "editable_by? returns true for owner of user-owned record" do
+    user = create(:user)
+    radio_model = create(:radio_model, :user_owned, user: user)
+    assert radio_model.editable_by?(user)
+  end
+
+  test "editable_by? returns false for non-owner of user-owned record" do
+    owner = create(:user)
+    other_user = create(:user)
+    radio_model = create(:radio_model, :user_owned, user: owner)
+    assert_not radio_model.editable_by?(other_user)
+  end
+
+  test "editable_by? returns false when user is nil" do
+    radio_model = create(:radio_model, :user_owned)
+    assert_not radio_model.editable_by?(nil)
+  end
 end

@@ -1,12 +1,23 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><%= @manufacturer.name %></h1>
     <div>
-      <%= link_to "Edit", edit_manufacturer_path(@manufacturer), class: "btn btn-secondary me-1" %>
-      <%= button_to "Delete", manufacturer_path(@manufacturer), method: :delete,
-          class: "btn btn-danger me-1",
-          form: { class: "d-inline" },
-          data: { confirm: "Are you sure? This will prevent deletion if radio models exist." } %>
+      <h1>
+        <%= @manufacturer.name %>
+        <% if @manufacturer.system_record? %>
+          <span class="badge bg-secondary fs-6">System</span>
+        <% else %>
+          <span class="badge bg-primary fs-6">Custom</span>
+        <% end %>
+      </h1>
+    </div>
+    <div>
+      <% if @manufacturer.editable_by?(current_user) %>
+        <%= link_to "Edit", edit_manufacturer_path(@manufacturer), class: "btn btn-secondary me-1" %>
+        <%= button_to "Delete", manufacturer_path(@manufacturer), method: :delete,
+            class: "btn btn-danger me-1",
+            form: { class: "d-inline" },
+            data: { turbo_confirm: "Are you sure? This will prevent deletion if radio models exist." } %>
+      <% end %>
       <%= link_to "Back", manufacturers_path, class: "btn btn-outline-secondary" %>
     </div>
   </div>
@@ -17,6 +28,15 @@
       <dl class="row mb-0">
         <dt class="col-sm-3">Name:</dt>
         <dd class="col-sm-9"><%= @manufacturer.name %></dd>
+
+        <dt class="col-sm-3">Type:</dt>
+        <dd class="col-sm-9">
+          <% if @manufacturer.system_record? %>
+            <span class="badge bg-secondary">System (read-only)</span>
+          <% else %>
+            <span class="badge bg-primary">Custom</span>
+          <% end %>
+        </dd>
 
         <dt class="col-sm-3">Radio Models:</dt>
         <dd class="col-sm-9"><%= @manufacturer.radio_models.count %></dd>
@@ -35,6 +55,7 @@
             <thead>
               <tr>
                 <th>Model Name</th>
+                <th>Type</th>
                 <th>Supported Modes</th>
                 <th>Max Zones</th>
                 <th>Max Channels/Zone</th>
@@ -45,6 +66,13 @@
               <% @manufacturer.radio_models.order(:name).each do |radio_model| %>
                 <tr>
                   <td><%= link_to radio_model.name, radio_model_path(radio_model) %></td>
+                  <td>
+                    <% if radio_model.system_record? %>
+                      <span class="badge bg-secondary">System</span>
+                    <% else %>
+                      <span class="badge bg-primary">Custom</span>
+                    <% end %>
+                  </td>
                   <td><%= radio_model.supported_modes.join(", ") %></td>
                   <td><%= radio_model.max_zones || "Unlimited" %></td>
                   <td><%= radio_model.max_channels_per_zone || "Unlimited" %></td>

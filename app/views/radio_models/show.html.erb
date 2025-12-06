@@ -1,15 +1,39 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><%= @radio_model.name %></h1>
     <div>
-      <%= link_to "Edit", edit_radio_model_path(@radio_model), class: "btn btn-primary me-1" %>
+      <h1>
+        <%= @radio_model.name %>
+        <% if @radio_model.system_record? %>
+          <span class="badge bg-secondary fs-6">System</span>
+        <% else %>
+          <span class="badge bg-primary fs-6">Custom</span>
+        <% end %>
+      </h1>
+    </div>
+    <div>
+      <% if @radio_model.editable_by?(current_user) %>
+        <%= link_to "Edit", edit_radio_model_path(@radio_model), class: "btn btn-primary me-1" %>
+        <%= button_to "Delete", radio_model_path(@radio_model), method: :delete,
+            class: "btn btn-danger me-1",
+            form: { class: "d-inline" },
+            data: { turbo_confirm: "Are you sure?" } %>
+      <% end %>
       <%= link_to "Back", radio_models_path, class: "btn btn-secondary" %>
     </div>
   </div>
 
   <dl class="row">
     <dt class="col-sm-3">Manufacturer:</dt>
-    <dd class="col-sm-9"><%= @radio_model.manufacturer.name %></dd>
+    <dd class="col-sm-9"><%= link_to @radio_model.manufacturer.name, manufacturer_path(@radio_model.manufacturer) %></dd>
+
+    <dt class="col-sm-3">Type:</dt>
+    <dd class="col-sm-9">
+      <% if @radio_model.system_record? %>
+        <span class="badge bg-secondary">System (read-only)</span>
+      <% else %>
+        <span class="badge bg-primary">Custom</span>
+      <% end %>
+    </dd>
 
     <dt class="col-sm-3">Supported Modes:</dt>
     <dd class="col-sm-9"><%= @radio_model.supported_modes.join(", ") %></dd>

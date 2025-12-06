@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_11_08_040852) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_06_035936) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -91,8 +91,11 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_08_040852) do
   create_table "manufacturers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name", null: false
+    t.boolean "system_record", default: false, null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["name"], name: "index_manufacturers_on_name", unique: true
+    t.index ["user_id"], name: "index_manufacturers_on_user_id"
   end
 
   create_table "networks", force: :cascade do |t|
@@ -123,9 +126,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_08_040852) do
     t.integer "short_channel_name_length"
     t.integer "short_zone_name_length"
     t.text "supported_modes", null: false
+    t.boolean "system_record", default: false, null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["manufacturer_id", "name"], name: "index_radio_models_on_manufacturer_id_and_name", unique: true
     t.index ["manufacturer_id"], name: "index_radio_models_on_manufacturer_id"
+    t.index ["user_id"], name: "index_radio_models_on_user_id"
   end
 
   create_table "system_networks", force: :cascade do |t|
@@ -242,7 +248,9 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_08_040852) do
   add_foreign_key "codeplug_zones", "codeplugs"
   add_foreign_key "codeplug_zones", "zones"
   add_foreign_key "codeplugs", "users"
+  add_foreign_key "manufacturers", "users"
   add_foreign_key "radio_models", "manufacturers"
+  add_foreign_key "radio_models", "users"
   add_foreign_key "system_networks", "networks"
   add_foreign_key "system_networks", "systems"
   add_foreign_key "system_talk_groups", "systems"
