@@ -3,8 +3,10 @@ require "test_helper"
 class SystemTalkGroupsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = create(:user)
-    @system = create(:system, mode: "dmr")
-    @talk_group = create(:talk_group)
+    @dmr_network = create(:network, network_type: "Digital-DMR")
+    @system = create(:system, mode: "dmr", color_code: 1)
+    @system.networks << @dmr_network
+    @talk_group = create(:talk_group, network: @dmr_network)
   end
 
   # Create Action Tests
@@ -40,11 +42,29 @@ class SystemTalkGroupsControllerTest < ActionDispatch::IntegrationTest
     assert_match "text/vnd.turbo-stream.html", response.content_type
   end
 
-  test "should create system_talk_group without timeslot for non-DMR" do
+  test "should create system_talk_group without timeslot for P25" do
+    log_in_as(@user)
+    p25_network = create(:network, network_type: "Digital-P25")
+    p25_system = create(:system, :p25)
+    p25_talkgroup = create(:talk_group, network: p25_network)
+
+    assert_difference("SystemTalkGroup.count", 1) do
+      post system_system_talk_groups_path(p25_system), params: {
+        system_talk_group: {
+          talk_group_id: p25_talkgroup.id,
+          timeslot: nil
+        }
+      }
+    end
+
+    assert_redirected_to system_path(p25_system)
+  end
+
+  test "should not create system_talk_group for analog system" do
     log_in_as(@user)
     analog_system = create(:system, :analog)
 
-    assert_difference("SystemTalkGroup.count", 1) do
+    assert_no_difference("SystemTalkGroup.count") do
       post system_system_talk_groups_path(analog_system), params: {
         system_talk_group: {
           talk_group_id: @talk_group.id,
@@ -53,7 +73,7 @@ class SystemTalkGroupsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to system_path(analog_system)
+    assert_response :unprocessable_entity
   end
 
   test "should not create system_talk_group without timeslot for DMR" do

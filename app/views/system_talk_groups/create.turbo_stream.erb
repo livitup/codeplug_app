@@ -5,5 +5,5 @@
 <% end %>
 
 <%= turbo_stream.update "system_talk_group_form" do %>
-  <%= render "system_talk_groups/form", system: @system %>
+  <%= render "system_talk_groups/form", system: @system, available_talk_groups: @available_talk_groups %>
 <% end %>

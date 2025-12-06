@@ -1,30 +1,104 @@
 require "application_system_test_case"
 
 class SystemTalkGroupsTest < ApplicationSystemTestCase
-  test "visiting a system shows empty talkgroups section" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
+  setup do
+    @user = create(:user, email: "test@example.com", password: "password123")
+    @dmr_network = create(:network, name: "Brandmeister", network_type: "Digital-DMR")
+    @p25_network = create(:network, name: "P25 Net", network_type: "Digital-P25")
+  end
 
-    # Visit system page (will redirect to login)
-    visit system_path(system)
+  # Analog Systems - No TalkGroups section
+  test "analog system does not show talkgroups section" do
+    analog_system = create(:system, :analog, name: "Analog Repeater")
 
-    # Fill in login form
+    visit system_path(analog_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
 
-    # Should be back at system page after login
+    assert_text "Analog Repeater"
+    assert_text "ANALOG"
+    # Check that the talkgroups section card doesn't exist
+    assert_no_selector "#talkgroups-section"
+    assert_no_text "Add TalkGroup"
+  end
+
+  # DMR Systems without network - Show helpful message
+  test "DMR system without network shows helpful message" do
+    dmr_system = create(:system, mode: "dmr", name: "DMR Repeater", color_code: 1)
+    # Don't associate with any network
+
+    visit system_path(dmr_system)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "TalkGroups"
+    assert_text "Associate this system with a DMR network to add talkgroups"
+    assert_link "Edit System"
+  end
+
+  # DMR Systems with network - Show only talkgroups from associated networks
+  test "DMR system with network shows only talkgroups from that network" do
+    dmr_system = create(:system, mode: "dmr", name: "DMR Repeater", color_code: 1)
+    dmr_system.networks << @dmr_network
+
+    # Create talkgroups on different networks
+    associated_tg = create(:talk_group, name: "Virginia", network: @dmr_network)
+    other_network = create(:network, name: "Other DMR", network_type: "Digital-DMR")
+    other_tg = create(:talk_group, name: "Other TG", network: other_network)
+
+    visit system_path(dmr_system)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Should see the associated talkgroup in dropdown
+    assert_selector "option", text: "Virginia"
+    # Should NOT see the other network's talkgroup
+    assert_no_selector "option", text: "Other TG"
+  end
+
+  # P25 Systems - Show only P25 talkgroups
+  test "P25 system shows only P25 talkgroups" do
+    p25_system = create(:system, :p25, name: "P25 System")
+
+    # Create talkgroups on different networks
+    p25_tg = create(:talk_group, name: "P25 TalkGroup", network: @p25_network)
+    dmr_tg = create(:talk_group, name: "DMR TalkGroup", network: @dmr_network)
+
+    visit system_path(p25_system)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Should see P25 talkgroup in dropdown
+    assert_selector "option", text: "P25 TalkGroup"
+    # Should NOT see DMR talkgroup
+    assert_no_selector "option", text: "DMR TalkGroup"
+  end
+
+  # Basic functionality tests
+  test "visiting a system shows empty talkgroups section" do
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+
+    visit system_path(dmr_system)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
     assert_text "TalkGroups"
     assert_text "No talkgroups associated with this system yet"
     assert_text "Add TalkGroup"
   end
 
   test "adding a talkgroup with timeslot to a system" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+    talk_group = create(:talk_group, name: "Virginia", network: @dmr_network)
 
-    visit system_path(system)
+    visit system_path(dmr_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
@@ -40,32 +114,31 @@ class SystemTalkGroupsTest < ApplicationSystemTestCase
     assert_no_text "No talkgroups associated with this system yet"
   end
 
-  test "adding a talkgroup without timeslot" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
+  test "adding a talkgroup to P25 system without timeslot" do
+    p25_system = create(:system, :p25, name: "Test P25 System")
+    talk_group = create(:talk_group, name: "P25 TG", network: @p25_network)
 
-    visit system_path(system)
+    visit system_path(p25_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
 
-    # Add a talkgroup without timeslot
-    select "Virginia", from: "TalkGroup"
+    # Add a talkgroup without timeslot (P25 doesn't require timeslot)
+    select "P25 TG", from: "TalkGroup"
     select "None", from: "Timeslot"
     click_button "Add TalkGroup"
 
     # Verify the talkgroup appears without timeslot badge
-    assert_text "Virginia"
+    assert_text "P25 TG"
     assert_no_text "TS"
   end
 
   test "adding same talkgroup on different timeslots" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+    talk_group = create(:talk_group, name: "Virginia", network: @dmr_network)
 
-    visit system_path(system)
+    visit system_path(dmr_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
@@ -88,12 +161,12 @@ class SystemTalkGroupsTest < ApplicationSystemTestCase
   end
 
   test "removing a talkgroup from a system" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
-    create(:system_talk_group, system: system, talk_group: talk_group, timeslot: 1)
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+    talk_group = create(:talk_group, name: "Virginia", network: @dmr_network)
+    create(:system_talk_group, system: dmr_system, talk_group: talk_group, timeslot: 1)
 
-    visit system_path(system)
+    visit system_path(dmr_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
@@ -115,14 +188,14 @@ class SystemTalkGroupsTest < ApplicationSystemTestCase
   end
 
   test "displaying multiple talkgroups" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
-    another_talk_group = create(:talk_group, name: "Worldwide")
-    create(:system_talk_group, system: system, talk_group: talk_group, timeslot: 1)
-    create(:system_talk_group, system: system, talk_group: another_talk_group, timeslot: 2)
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+    talk_group = create(:talk_group, name: "Virginia", network: @dmr_network)
+    another_talk_group = create(:talk_group, name: "Worldwide", network: @dmr_network)
+    create(:system_talk_group, system: dmr_system, talk_group: talk_group, timeslot: 1)
+    create(:system_talk_group, system: dmr_system, talk_group: another_talk_group, timeslot: 2)
 
-    visit system_path(system)
+    visit system_path(dmr_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"
@@ -135,12 +208,12 @@ class SystemTalkGroupsTest < ApplicationSystemTestCase
   end
 
   test "talkgroup links to talkgroup show page" do
-    user = create(:user, email: "test@example.com", password: "password123")
-    system = create(:system, mode: "dmr", name: "Test DMR System")
-    talk_group = create(:talk_group, name: "Virginia")
-    create(:system_talk_group, system: system, talk_group: talk_group, timeslot: 1)
+    dmr_system = create(:system, mode: "dmr", name: "Test DMR System", color_code: 1)
+    dmr_system.networks << @dmr_network
+    talk_group = create(:talk_group, name: "Virginia", network: @dmr_network)
+    create(:system_talk_group, system: dmr_system, talk_group: talk_group, timeslot: 1)
 
-    visit system_path(system)
+    visit system_path(dmr_system)
     fill_in "Email", with: "test@example.com"
     fill_in "Password", with: "password123"
     click_button "Log In"

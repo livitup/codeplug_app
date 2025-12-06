@@ -210,8 +210,11 @@ class ChannelTest < ActiveSupport::TestCase
 
   # System TalkGroup Tests
   test "should save digital channel with system_talk_group" do
-    dmr_system = create(:system)  # Default is DMR
-    talkgroup = create(:talk_group)
+    # Create DMR system with network association
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", color_code: 1)
+    dmr_system.networks << dmr_network
+    talkgroup = create(:talk_group, network: dmr_network)
     system_talk_group = create(:system_talk_group, system: dmr_system, talk_group: talkgroup, timeslot: 1)
     channel = build(:channel, system: dmr_system, system_talk_group: system_talk_group)
 

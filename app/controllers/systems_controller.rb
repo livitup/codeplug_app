@@ -6,7 +6,7 @@ class SystemsController < ApplicationController
   end
 
   def show
-    # Display system details
+    @available_talk_groups = available_talk_groups_for_system(@system)
   end
 
   def new
@@ -57,5 +57,26 @@ class SystemsController < ApplicationController
       :color_code, :nac,
       network_ids: []
     )
+  end
+
+  def available_talk_groups_for_system(system)
+    case system.mode
+    when "analog"
+      # Analog systems cannot have talkgroups
+      TalkGroup.none
+    when "p25"
+      # P25 systems can only use talkgroups from P25 networks
+      TalkGroup.joins(:network).where(networks: { network_type: "Digital-P25" }).order(:name)
+    when "dmr"
+      # DMR systems can only use talkgroups from their associated networks
+      if system.networks.any?
+        TalkGroup.where(network_id: system.network_ids).order(:name)
+      else
+        TalkGroup.none
+      end
+    else
+      # NXDN and other modes - show all talkgroups for now
+      TalkGroup.includes(:network).order(:name)
+    end
   end
 end
