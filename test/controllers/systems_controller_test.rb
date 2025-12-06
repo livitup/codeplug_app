@@ -79,6 +79,16 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "new form should have grouped tone dropdowns" do
+    get new_system_path
+    assert_select "select[name='system[tx_tone_value]']"
+    assert_select "select[name='system[rx_tone_value]']"
+    # Check for CTCSS optgroup
+    assert_select "optgroup[label='CTCSS Tones']"
+    # Check for DCS optgroup
+    assert_select "optgroup[label='DCS Codes']"
+  end
+
   # Create Tests - DMR
   test "should create DMR system with valid attributes" do
     assert_difference("System.count", 1) do
