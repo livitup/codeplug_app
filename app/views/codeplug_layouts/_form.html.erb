@@ -1,4 +1,8 @@
-<%= form_with(model: codeplug_layout, local: true) do |form| %>
+<%= form_with(model: codeplug_layout, local: true,
+    data: {
+      controller: "field-picker",
+      field_picker_fields_value: available_source_fields_json
+    }) do |form| %>
   <% if codeplug_layout.errors.any? %>
     <div class="alert alert-danger">
       <h4><%= pluralize(codeplug_layout.errors.count, "error") %> prohibited this codeplug layout from being saved:</h4>
@@ -10,36 +14,176 @@
     </div>
   <% end %>
 
-  <div class="mb-3">
-    <%= form.label :name, class: "form-label" %>
-    <%= form.text_field :name, class: "form-control", placeholder: "e.g., CHIRP CSV Format" %>
-  </div>
-
-  <div class="mb-3">
-    <%= form.label :radio_model_id, "Radio Model", class: "form-label" %>
-    <%= form.collection_select :radio_model_id,
-        RadioModel.includes(:manufacturer).order("manufacturers.name, radio_models.name"),
-        :id,
-        ->(rm) { "#{rm.manufacturer.name} #{rm.name}" },
-        { prompt: "Select a radio model" },
-        { class: "form-select" } %>
-  </div>
-
-  <div class="mb-3">
-    <%= form.label :layout_definition, class: "form-label" %>
-    <div class="form-text mb-2">
-      Define the CSV column mapping as JSON. Example:
-      <code>{"columns": [{"header": "Channel Name", "maps_to": "long_name"}]}</code>
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= form.label :name, class: "form-label" %>
+        <%= form.text_field :name, class: "form-control", placeholder: "e.g., CHIRP CSV Format" %>
+      </div>
     </div>
-    <%= form.text_area :layout_definition,
-        class: "form-control font-monospace",
-        rows: 10,
-        placeholder: '{"columns": [{"header": "Channel Name", "maps_to": "long_name"}, {"header": "RX Freq", "maps_to": "system.rx_frequency"}]}',
-        value: codeplug_layout.layout_definition ? JSON.pretty_generate(codeplug_layout.layout_definition) : nil %>
+    <div class="col-md-6">
+      <div class="mb-3">
+        <%= form.label :radio_model_id, "Radio Model", class: "form-label" %>
+        <%= form.collection_select :radio_model_id,
+            RadioModel.visible_to(current_user).includes(:manufacturer).order("manufacturers.name, radio_models.name"),
+            :id,
+            ->(rm) { "#{rm.manufacturer.name} #{rm.name}" },
+            { prompt: "Select a radio model" },
+            { class: "form-select" } %>
+      </div>
+    </div>
   </div>
+
+  <hr class="my-4">
+
+  <h5 class="mb-3">
+    <i class="bi bi-columns-gap me-2"></i>
+    CSV Column Layout
+  </h5>
+  <p class="text-muted mb-4">
+    Drag fields from the left panel to build your CSV layout. Reorder columns by dragging, and customize header names.
+  </p>
+
+  <div class="row">
+    <%# Source Fields Panel %>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header bg-light">
+          <h6 class="mb-0">
+            <i class="bi bi-list-ul me-2"></i>
+            Available Fields
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <input type="text"
+                   class="form-control form-control-sm"
+                   placeholder="Search fields..."
+                   data-field-picker-target="searchInput"
+                   data-action="input->field-picker#search">
+          </div>
+          <div class="source-fields-container" style="max-height: 400px; overflow-y: auto;">
+            <div data-field-picker-target="sourceFields">
+              <%# Source fields will be rendered by JavaScript %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# Layout Builder Panel %>
+    <div class="col-md-8">
+      <div class="card h-100">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-table me-2"></i>
+            CSV Columns
+          </h6>
+          <small class="text-muted">Drag to reorder</small>
+        </div>
+        <div class="card-body">
+          <div class="layout-builder-container" style="min-height: 200px;">
+            <div class="list-group" data-field-picker-target="layoutBuilder">
+              <%# Layout fields will be rendered by JavaScript %>
+            </div>
+            <p class="text-muted text-center mt-3 empty-message" id="empty-layout-message">
+              <i class="bi bi-arrow-left me-2"></i>
+              Drag fields here to add them to your layout
+            </p>
+          </div>
+        </div>
+        <div class="card-footer bg-light">
+          <h6 class="mb-2">
+            <i class="bi bi-eye me-2"></i>
+            CSV Header Preview
+          </h6>
+          <code class="d-block p-2 bg-white border rounded" data-field-picker-target="csvPreview" style="white-space: nowrap; overflow-x: auto;">
+            <%# CSV preview will be rendered by JavaScript %>
+          </code>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Hidden field for JSON layout definition %>
+  <%= form.hidden_field :layout_definition, data: { field_picker_target: "layoutDefinition" },
+      value: codeplug_layout.layout_definition ? codeplug_layout.layout_definition.to_json : '{"columns":[]}' %>
+
+  <%# Advanced: JSON Preview %>
+  <div class="mt-4">
+    <a class="text-muted small"
+       data-bs-toggle="collapse"
+       href="#jsonPreviewCollapse"
+       role="button"
+       aria-expanded="false"
+       aria-controls="jsonPreviewCollapse">
+      <i class="bi bi-code-slash me-1"></i>
+      Show JSON Preview (Advanced)
+    </a>
+    <div class="collapse mt-2" id="jsonPreviewCollapse">
+      <div class="card">
+        <div class="card-body">
+          <pre class="mb-0 p-2 bg-light rounded" data-field-picker-target="jsonPreview" style="max-height: 200px; overflow: auto;">
+            <%# JSON preview will be rendered by JavaScript %>
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-4">
 
   <div class="d-flex gap-2">
     <%= form.submit class: "btn btn-primary" %>
     <%= link_to "Cancel", codeplug_layout.persisted? ? codeplug_layout_path(codeplug_layout) : codeplug_layouts_path, class: "btn btn-secondary" %>
   </div>
 <% end %>
+
+<style>
+  .source-field {
+    cursor: grab;
+    user-select: none;
+  }
+
+  .source-field:hover {
+    background-color: #f8f9fa;
+  }
+
+  .source-field.dragging {
+    opacity: 0.5;
+  }
+
+  .layout-field {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .layout-field:hover {
+    border-color: #0d6efd;
+  }
+
+  .layout-field .header-input {
+    max-width: 200px;
+  }
+
+  .layout-builder-container .list-group:not(:empty) + .empty-message {
+    display: none;
+  }
+
+  .field-group-header {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .drag-handle {
+    cursor: grab;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+</style>

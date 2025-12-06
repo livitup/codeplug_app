@@ -59,6 +59,36 @@ class CodeplugLayoutsControllerTest < ActionDispatch::IntegrationTest
     assert_select "select#codeplug_layout_radio_model_id"
   end
 
+  test "new form should have field picker controller" do
+    get new_codeplug_layout_path
+    assert_select "form[data-controller='field-picker']"
+  end
+
+  test "new form should have source fields panel" do
+    get new_codeplug_layout_path
+    assert_select "[data-field-picker-target='sourceFields']"
+  end
+
+  test "new form should have layout builder panel" do
+    get new_codeplug_layout_path
+    assert_select "[data-field-picker-target='layoutBuilder']"
+  end
+
+  test "new form should have CSV preview" do
+    get new_codeplug_layout_path
+    assert_select "[data-field-picker-target='csvPreview']"
+  end
+
+  test "new form should have search input" do
+    get new_codeplug_layout_path
+    assert_select "[data-field-picker-target='searchInput']"
+  end
+
+  test "new form should have JSON preview toggle" do
+    get new_codeplug_layout_path
+    assert_select "a[href='#jsonPreviewCollapse']", text: /JSON Preview/
+  end
+
   # Create Tests
   test "should create codeplug layout with valid attributes" do
     layout_def = {

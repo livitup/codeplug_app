@@ -4,6 +4,9 @@
 
 import { application } from "./application"
 
+import FieldPickerController from "./field_picker_controller"
+application.register("field-picker", FieldPickerController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
