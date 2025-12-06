@@ -1,6 +1,7 @@
 class RadioModel < ApplicationRecord
   # Associations
   belongs_to :manufacturer
+  belongs_to :user, optional: true
   has_many :codeplug_layouts, dependent: :restrict_with_error
 
   # Serialization
@@ -18,6 +19,18 @@ class RadioModel < ApplicationRecord
   validates :short_channel_name_length, numericality: { greater_than: 0, allow_nil: true }
   validates :long_zone_name_length, numericality: { greater_than: 0, allow_nil: true }
   validates :short_zone_name_length, numericality: { greater_than: 0, allow_nil: true }
+
+  # Scopes
+  scope :system, -> { where(system_record: true) }
+  scope :user_owned, ->(user) { where(user_id: user.id) }
+  scope :visible_to, ->(user) { where(system_record: true).or(where(user_id: user.id)) }
+
+  # Authorization methods
+  def editable_by?(user)
+    return false if user.nil?
+    return false if system_record?
+    self.user == user
+  end
 
   private
 
