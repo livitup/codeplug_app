@@ -81,20 +81,22 @@
     </div>
   </div>
 
-  <div class="card mb-4">
-    <div class="card-body">
-      <h5 class="card-title">TalkGroups</h5>
+  <% unless @system.mode == "analog" %>
+    <div class="card mb-4" id="talkgroups-section">
+      <div class="card-body">
+        <h5 class="card-title">TalkGroups</h5>
 
-      <div id="system_talk_groups" class="mb-4">
-        <% if @system.system_talk_groups.any? %>
-          <%= render partial: "system_talk_groups/system_talk_group", collection: @system.system_talk_groups, locals: { system: @system } %>
-        <% else %>
-          <p id="empty_talkgroups_message" class="text-muted">No talkgroups associated with this system yet.</p>
-        <% end %>
+        <div id="system_talk_groups" class="mb-4">
+          <% if @system.system_talk_groups.any? %>
+            <%= render partial: "system_talk_groups/system_talk_group", collection: @system.system_talk_groups, locals: { system: @system } %>
+          <% else %>
+            <p id="empty_talkgroups_message" class="text-muted">No talkgroups associated with this system yet.</p>
+          <% end %>
+        </div>
+
+        <h6 class="mt-4 mb-3">Add TalkGroup</h6>
+        <%= render "system_talk_groups/form", system: @system, available_talk_groups: @available_talk_groups %>
       </div>
-
-      <h6 class="mt-4 mb-3">Add TalkGroup</h6>
-      <%= render "system_talk_groups/form", system: @system %>
     </div>
-  </div>
+  <% end %>
 </div>

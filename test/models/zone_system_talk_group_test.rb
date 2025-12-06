@@ -90,11 +90,15 @@ class ZoneSystemTalkGroupTest < ActiveSupport::TestCase
 
   # Multiple ZoneSystemTalkGroups per ZoneSystem
   test "zone_system can have multiple zone_system_talk_groups" do
-    system = create(:system)
+    # Create DMR system with network association
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    system = create(:system, mode: "dmr", color_code: 1)
+    system.networks << dmr_network
     zone_system = create(:zone_system, system: system)
-    stg1 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG1"))
-    stg2 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG2"))
-    stg3 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG3"))
+
+    stg1 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG1", network: dmr_network))
+    stg2 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG2", network: dmr_network))
+    stg3 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG3", network: dmr_network))
 
     zstg1 = create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg1)
     zstg2 = create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg2)
@@ -108,10 +112,14 @@ class ZoneSystemTalkGroupTest < ActiveSupport::TestCase
 
   # Through Association Tests
   test "zone_system should have system_talkgroups through zone_system_talkgroups" do
-    system = create(:system)
+    # Create DMR system with network association
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    system = create(:system, mode: "dmr", color_code: 1)
+    system.networks << dmr_network
     zone_system = create(:zone_system, system: system)
-    stg1 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG1"))
-    stg2 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG2"))
+
+    stg1 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG1", network: dmr_network))
+    stg2 = create(:system_talk_group, system: system, talk_group: create(:talk_group, name: "TG2", network: dmr_network))
 
     create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg1)
     create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg2)

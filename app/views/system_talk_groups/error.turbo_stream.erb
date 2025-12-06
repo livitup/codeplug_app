@@ -1,5 +1,5 @@
 <%= turbo_stream.update "system_talk_group_form" do %>
-  <%= render "system_talk_groups/form", system: @system %>
+  <%= render "system_talk_groups/form", system: @system, available_talk_groups: @available_talk_groups %>
   <div class="alert alert-danger mt-3" role="alert">
     <strong>Error:</strong>
     <% if @system_talk_group.errors.any? %>
