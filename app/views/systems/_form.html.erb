@@ -56,7 +56,10 @@
         <%= f.check_box :supports_tx_tone, class: "form-check-input" %>
         <%= f.label :supports_tx_tone, "Supports TX Tone", class: "form-check-label" %>
       </div>
-      <%= f.text_field :tx_tone_value, class: "form-control mt-2", placeholder: "e.g., 127.3 or 065" %>
+      <%= f.select :tx_tone_value,
+          grouped_options_for_select(System::TONE_OPTIONS, system.tx_tone_value),
+          { prompt: "Select tone", include_blank: true },
+          { class: "form-select mt-2" } %>
       <div class="form-text">CTCSS or DCS tone value</div>
     </div>
 
@@ -65,7 +68,10 @@
         <%= f.check_box :supports_rx_tone, class: "form-check-input" %>
         <%= f.label :supports_rx_tone, "Supports RX Tone", class: "form-check-label" %>
       </div>
-      <%= f.text_field :rx_tone_value, class: "form-control mt-2", placeholder: "e.g., 127.3 or 065" %>
+      <%= f.select :rx_tone_value,
+          grouped_options_for_select(System::TONE_OPTIONS, system.rx_tone_value),
+          { prompt: "Select tone", include_blank: true },
+          { class: "form-select mt-2" } %>
       <div class="form-text">CTCSS or DCS tone value</div>
     </div>
   </div>

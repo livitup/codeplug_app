@@ -111,6 +111,35 @@ class SystemTest < ActiveSupport::TestCase
     assert system.save, "Failed to save repeater system"
   end
 
+  # Tone Constants Tests
+  test "CTCSS_TONES constant should be defined with 38 values" do
+    assert_equal 38, System::CTCSS_TONES.length
+    assert_includes System::CTCSS_TONES, "67.0"
+    assert_includes System::CTCSS_TONES, "127.3"
+    assert_includes System::CTCSS_TONES, "250.3"
+  end
+
+  test "CTCSS_TONES constant should be frozen" do
+    assert System::CTCSS_TONES.frozen?
+  end
+
+  test "DCS_CODES constant should be defined with 104 values" do
+    assert_equal 104, System::DCS_CODES.length
+    assert_includes System::DCS_CODES, "023"
+    assert_includes System::DCS_CODES, "065"
+    assert_includes System::DCS_CODES, "754"
+  end
+
+  test "DCS_CODES constant should be frozen" do
+    assert System::DCS_CODES.frozen?
+  end
+
+  test "TONE_OPTIONS should provide grouped options for select" do
+    assert_equal 2, System::TONE_OPTIONS.length
+    assert_equal "CTCSS Tones", System::TONE_OPTIONS[0][0]
+    assert_equal "DCS Codes", System::TONE_OPTIONS[1][0]
+  end
+
   # Tone Tests
   test "should allow nil tone values" do
     system = build(:system, tx_tone_value: nil, rx_tone_value: nil)
