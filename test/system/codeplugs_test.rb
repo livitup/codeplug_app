@@ -147,4 +147,75 @@ class CodeplugsTest < ApplicationSystemTestCase
     assert_text "No codeplugs found"
     assert_link "Create the first one"
   end
+
+  test "codeplug show page displays full channel list inline" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create systems and channels
+    dmr_system = create(:system, name: "DMR Repeater", mode: "dmr", color_code: 1)
+    analog_system = create(:system, :analog, name: "Analog Repeater")
+
+    channel1 = create(:channel, codeplug: codeplug, system: dmr_system, name: "CH1", long_name: "DMR Channel 1")
+    channel2 = create(:channel, codeplug: codeplug, system: analog_system, name: "CH2", long_name: "Analog Channel")
+    channel3 = create(:channel, codeplug: codeplug, system: dmr_system, name: "CH3", long_name: "DMR Channel 2")
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Verify all channels are displayed (not just first 5)
+    assert_text "DMR Channel 1"
+    assert_text "Analog Channel"
+    assert_text "DMR Channel 2"
+
+    # Verify system info is shown
+    assert_text "DMR Repeater"
+    assert_text "Analog Repeater"
+
+    # Verify channel names link to detail page (using long_name)
+    assert_selector "a", text: "DMR Channel 1"
+    assert_selector "a", text: "Analog Channel"
+    assert_selector "a", text: "DMR Channel 2"
+
+    # Verify "Edit Channels" button exists (not "Manage Channels")
+    assert_link "Edit Channels"
+    assert_no_link "Manage Channels"
+  end
+
+  test "codeplug show page channel list is read-only" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+    system = create(:system, mode: "dmr", color_code: 1)
+    channel = create(:channel, codeplug: codeplug, system: system, name: "Test Channel")
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Verify no edit/delete buttons in channel list (read-only view)
+    # The table should not have action buttons like on the channels index page
+    within("#channels-section table") do
+      assert_no_button "Delete"
+      assert_no_link "Edit"
+      assert_no_link "View"
+    end
+  end
+
+  test "codeplug show page Edit Channels button navigates to channels index" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    click_link "Edit Channels"
+
+    assert_current_path codeplug_channels_path(codeplug)
+    assert_text "Channels - Test Codeplug"
+  end
 end
