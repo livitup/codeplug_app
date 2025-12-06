@@ -75,4 +75,111 @@ class ChannelsTest < ApplicationSystemTestCase
     select "NXDN System", from: "System"
     assert_selector "#talkgroup-field", visible: :visible
   end
+
+  # Talkgroup filtering tests
+  test "talkgroup dropdown only shows talkgroups for selected DMR system" do
+    # Create two DMR systems with different networks
+    network1 = create(:network, name: "Network 1", network_type: "Digital-DMR")
+    network2 = create(:network, name: "Network 2", network_type: "Digital-DMR")
+
+    dmr_system1 = create(:system, mode: "dmr", name: "DMR System 1", color_code: 1)
+    dmr_system1.networks << network1
+    dmr_system2 = create(:system, mode: "dmr", name: "DMR System 2", color_code: 2)
+    dmr_system2.networks << network2
+
+    # Create talkgroups on each network
+    tg1 = create(:talk_group, name: "TG on Network 1", network: network1)
+    tg2 = create(:talk_group, name: "TG on Network 2", network: network2)
+
+    # Create system_talk_groups
+    stg1 = create(:system_talk_group, system: dmr_system1, talk_group: tg1, timeslot: 1)
+    stg2 = create(:system_talk_group, system: dmr_system2, talk_group: tg2, timeslot: 1)
+
+    visit new_codeplug_channel_path(@codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Select DMR System 1
+    select "DMR System 1", from: "System"
+
+    # Should see TG from Network 1, not from Network 2
+    assert_selector "option", text: /TG on Network 1/
+    assert_no_selector "option", text: /TG on Network 2/
+
+    # Switch to DMR System 2
+    select "DMR System 2", from: "System"
+
+    # Should see TG from Network 2, not from Network 1
+    assert_selector "option", text: /TG on Network 2/
+    assert_no_selector "option", text: /TG on Network 1/
+  end
+
+  test "talkgroup dropdown shows P25 talkgroups for P25 system" do
+    # Create P25 system and network
+    p25_network = create(:network, name: "P25 Network", network_type: "Digital-P25")
+    dmr_network = create(:network, name: "DMR Network", network_type: "Digital-DMR")
+
+    p25_system = create(:system, :p25, name: "P25 System")
+
+    # Create talkgroups on each network
+    p25_tg = create(:talk_group, name: "P25 TalkGroup", network: p25_network)
+    dmr_tg = create(:talk_group, name: "DMR TalkGroup", network: dmr_network)
+
+    # Create system_talk_group for P25 (P25 doesn't require network association on system)
+    stg = create(:system_talk_group, system: p25_system, talk_group: p25_tg, timeslot: nil)
+
+    visit new_codeplug_channel_path(@codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Select P25 System
+    select "P25 System", from: "System"
+
+    # Should see P25 talkgroup
+    assert_selector "option", text: /P25 TalkGroup/
+    # Should NOT see DMR talkgroup
+    assert_no_selector "option", text: /DMR TalkGroup/
+  end
+
+  test "DMR system without network shows no talkgroups" do
+    dmr_system = create(:system, mode: "dmr", name: "DMR System No Network", color_code: 1)
+    # Don't associate with any network
+
+    visit new_codeplug_channel_path(@codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Select DMR System
+    select "DMR System No Network", from: "System"
+
+    # Talkgroup field should be visible but dropdown should only have prompt
+    assert_selector "#talkgroup-field", visible: :visible
+    within("#talkgroup-field") do
+      # Should only have the prompt option, no talkgroups
+      assert_selector "option", count: 2  # prompt + include_blank
+    end
+  end
+
+  test "editing channel shows correct talkgroups for the system" do
+    # Create DMR system with network and talkgroup
+    network = create(:network, name: "Test Network", network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", name: "DMR System", color_code: 1)
+    dmr_system.networks << network
+    tg = create(:talk_group, name: "Test TG", network: network)
+    stg = create(:system_talk_group, system: dmr_system, talk_group: tg, timeslot: 1)
+
+    # Create channel with this system and talkgroup
+    channel = create(:channel, codeplug: @codeplug, system: dmr_system, system_talk_group: stg, name: "Test Channel")
+
+    visit edit_codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Should see the talkgroup in dropdown
+    assert_selector "option", text: /Test TG/
+  end
 end

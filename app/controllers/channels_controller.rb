@@ -56,7 +56,9 @@ class ChannelsController < ApplicationController
 
   def load_form_data
     @systems = System.order(:name)
-    @system_talk_groups = SystemTalkGroup.includes(:talk_group).order("talk_groups.name")
+    @system_talk_groups = SystemTalkGroup.includes(:talk_group, :system).order("talk_groups.name")
+    # Group system talk groups by system_id for JavaScript filtering
+    @system_talk_groups_by_system = @system_talk_groups.group_by(&:system_id)
   end
 
   def channel_params

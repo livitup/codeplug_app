@@ -1,4 +1,5 @@
 <% system_modes = @systems.each_with_object({}) { |s, h| h[s.id] = s.mode } %>
+<% system_talk_groups_json = @system_talk_groups_by_system.transform_values { |stgs| stgs.map { |stg| { id: stg.id, name: "#{stg.talk_group.name} (TS#{stg.timeslot || 'N/A'})" } } }.to_json %>
 
 <%= form_with model: [ @codeplug, channel ], local: true do |f| %>
   <% if channel.errors.any? %>
@@ -34,7 +35,7 @@
   </div>
 
   <h5 class="mt-4 mb-3">System Configuration</h5>
-  <div class="row" id="system-configuration" data-system-modes="<%= system_modes.to_json %>">
+  <div class="row" id="system-configuration" data-system-modes="<%= system_modes.to_json %>" data-system-talk-groups="<%= system_talk_groups_json %>">
     <div class="col-md-6 mb-3">
       <%= f.label :system_id, "System", class: "form-label" %>
       <%= f.collection_select :system_id, @systems, :id, :name,
@@ -107,18 +108,23 @@
 <% end %>
 
 <script>
-  // Show/hide talkgroup field based on selected system's mode
+  // Show/hide talkgroup field and filter options based on selected system
   document.addEventListener('turbo:load', function() {
     const systemSelect = document.querySelector('#channel_system_id');
     if (!systemSelect) return; // Exit if not on channel form
 
     const talkgroupField = document.querySelector('#talkgroup-field');
+    const talkgroupSelect = document.querySelector('#channel_system_talk_group_id');
     const systemConfigEl = document.querySelector('#system-configuration');
-    if (!talkgroupField || !systemConfigEl) return;
+    if (!talkgroupField || !systemConfigEl || !talkgroupSelect) return;
 
     const systemModes = JSON.parse(systemConfigEl.dataset.systemModes || '{}');
+    const systemTalkGroups = JSON.parse(systemConfigEl.dataset.systemTalkGroups || '{}');
 
-    function updateTalkgroupVisibility() {
+    // Store the currently selected talkgroup to preserve it if possible
+    let currentTalkgroupId = talkgroupSelect.value;
+
+    function updateTalkgroupField() {
       const selectedSystemId = systemSelect.value;
 
       if (!selectedSystemId) {
@@ -130,15 +136,51 @@
       const mode = systemModes[selectedSystemId];
       if (mode === 'analog') {
         talkgroupField.style.display = 'none';
-      } else {
-        talkgroupField.style.display = 'block';
+        return;
       }
+
+      // Show field for digital modes
+      talkgroupField.style.display = 'block';
+
+      // Filter talkgroup options based on selected system
+      const availableTalkgroups = systemTalkGroups[selectedSystemId] || [];
+
+      // Clear and rebuild talkgroup options
+      talkgroupSelect.innerHTML = '';
+
+      // Add prompt option
+      const promptOption = document.createElement('option');
+      promptOption.value = '';
+      promptOption.textContent = 'Select a talkgroup';
+      talkgroupSelect.appendChild(promptOption);
+
+      // Add blank option (for optional selection)
+      const blankOption = document.createElement('option');
+      blankOption.value = '';
+      blankOption.textContent = '';
+      talkgroupSelect.appendChild(blankOption);
+
+      // Add available talkgroups
+      availableTalkgroups.forEach(function(tg) {
+        const option = document.createElement('option');
+        option.value = tg.id;
+        option.textContent = tg.name;
+        // Preserve selection if the talkgroup is still available
+        if (tg.id.toString() === currentTalkgroupId) {
+          option.selected = true;
+        }
+        talkgroupSelect.appendChild(option);
+      });
     }
 
     // Run on page load
-    updateTalkgroupVisibility();
+    updateTalkgroupField();
 
     // Run when system dropdown changes
-    systemSelect.addEventListener('change', updateTalkgroupVisibility);
+    systemSelect.addEventListener('change', function() {
+      // Reset current talkgroup when system changes
+      currentTalkgroupId = '';
+      updateTalkgroupField();
+    });
   });
 </script>
