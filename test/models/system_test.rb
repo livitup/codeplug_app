@@ -151,14 +151,24 @@ class SystemTest < ActiveSupport::TestCase
   end
 
   # Bandwidth Tests
+  test "BANDWIDTHS constant should be defined" do
+    assert_equal [ "12.5 kHz", "20 kHz", "25 kHz" ], System::BANDWIDTHS
+  end
+
+  test "BANDWIDTHS constant should be frozen" do
+    assert System::BANDWIDTHS.frozen?
+  end
+
   test "should allow nil bandwidth" do
     system = build(:system, bandwidth: nil)
     assert system.save, "Failed to save system with nil bandwidth"
   end
 
-  test "should save system with bandwidth" do
-    system = build(:system, bandwidth: "25kHz")
-    assert system.save, "Failed to save system with bandwidth"
+  test "should save system with valid bandwidth values" do
+    System::BANDWIDTHS.each do |bw|
+      system = build(:system, bandwidth: bw)
+      assert system.save, "Failed to save system with bandwidth: #{bw}"
+    end
   end
 
   # Boolean Defaults Tests

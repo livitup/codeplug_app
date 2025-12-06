@@ -63,7 +63,9 @@
 
     <div class="col-md-6 mb-3">
       <%= f.label :bandwidth, class: "form-label" %>
-      <%= f.text_field :bandwidth, class: "form-control", placeholder: "e.g., 25kHz, 12.5kHz" %>
+      <%= f.select :bandwidth, Channel::BANDWIDTHS,
+          { prompt: "Select bandwidth", include_blank: true },
+          { class: "form-select" } %>
       <div class="form-text">Override system bandwidth (optional)</div>
     </div>
   </div>

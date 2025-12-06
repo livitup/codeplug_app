@@ -71,6 +71,14 @@ class SystemsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form"
   end
 
+  test "new form should have bandwidth dropdown" do
+    get new_system_path
+    assert_select "select[name='system[bandwidth]']"
+    System::BANDWIDTHS.each do |bw|
+      assert_select "option[value='#{bw}']", text: bw
+    end
+  end
+
   # Create Tests - DMR
   test "should create DMR system with valid attributes" do
     assert_difference("System.count", 1) do

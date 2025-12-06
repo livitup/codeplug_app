@@ -46,6 +46,21 @@ class ChannelTest < ActiveSupport::TestCase
     assert channel.save, "Failed to save channel without bandwidth"
   end
 
+  test "BANDWIDTHS constant should be defined" do
+    assert_equal [ "12.5 kHz", "20 kHz", "25 kHz" ], Channel::BANDWIDTHS
+  end
+
+  test "BANDWIDTHS constant should be frozen" do
+    assert Channel::BANDWIDTHS.frozen?
+  end
+
+  test "should save channel with valid bandwidth values" do
+    Channel::BANDWIDTHS.each do |bw|
+      channel = build(:channel, bandwidth: bw)
+      assert channel.save, "Failed to save channel with bandwidth: #{bw}"
+    end
+  end
+
   # Association Tests
   test "should belong to codeplug" do
     channel = build(:channel)
