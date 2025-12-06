@@ -68,30 +68,41 @@
     </div>
 
     <div class="col-md-6 mb-4">
-      <div class="card h-100">
+      <div class="card h-100" id="channels-section">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title mb-0">Channels</h5>
-            <%= link_to "Manage Channels", codeplug_channels_path(@codeplug), class: "btn btn-sm btn-primary" %>
+            <%= link_to "Edit Channels", codeplug_channels_path(@codeplug), class: "btn btn-sm btn-primary" %>
           </div>
 
           <% if @codeplug.channels.any? %>
             <p class="text-muted mb-2"><strong><%= pluralize(@codeplug.channels.count, "channel") %></strong></p>
-            <ul class="list-unstyled">
-              <% @codeplug.channels.limit(5).each do |channel| %>
-                <li class="mb-1">
-                  <i class="bi bi-broadcast"></i> <%= channel.long_name %>
-                  <% if channel.system %>
-                    <span class="badge bg-info"><%= channel.system.mode.upcase %></span>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover mb-0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>System</th>
+                    <th>Mode</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @codeplug.channels.includes(:system).order(:name).each do |channel| %>
+                    <tr>
+                      <td><%= link_to channel.long_name.presence || channel.name, codeplug_channel_path(@codeplug, channel) %></td>
+                      <td><%= channel.system&.name || "—" %></td>
+                      <td>
+                        <% if channel.system %>
+                          <span class="badge bg-info"><%= channel.system.mode.upcase %></span>
+                        <% else %>
+                          —
+                        <% end %>
+                      </td>
+                    </tr>
                   <% end %>
-                </li>
-              <% end %>
-              <% if @codeplug.channels.count > 5 %>
-                <li class="text-muted mt-2">
-                  <small>+ <%= @codeplug.channels.count - 5 %> more channels</small>
-                </li>
-              <% end %>
-            </ul>
+                </tbody>
+              </table>
+            </div>
           <% else %>
             <p class="text-muted">No channels configured yet.</p>
           <% end %>
