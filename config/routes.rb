@@ -33,7 +33,9 @@ Rails.application.routes.draw do
 
   # Standalone zones (new top-level resource)
   resources :zones, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
-    resources :zone_systems, only: [ :create, :destroy ]
+    resources :zone_systems, only: [ :create, :destroy ] do
+      resources :zone_system_talkgroups, only: [ :create, :destroy ]
+    end
     member do
       patch :update_positions
     end

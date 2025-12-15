@@ -176,8 +176,47 @@
                         <% end %>
                       </small>
                       <% if zone_system.system.mode == "dmr" || zone_system.system.mode == "p25" %>
-                        <br>
-                        <small class="text-info">Talkgroups: (configure in next phase)</small>
+                        <div class="mt-2">
+                          <strong class="text-muted">Talkgroups:</strong>
+                          <% if zone_system.zone_system_talkgroups.any? %>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                              <% zone_system.zone_system_talkgroups.includes(system_talk_group: :talk_group).each do |zstg| %>
+                                <span class="badge bg-light text-dark border d-flex align-items-center">
+                                  <%= zstg.system_talk_group.talk_group.name %>
+                                  (<%= zstg.system_talk_group.talk_group.talkgroup_number %>)
+                                  <span class="badge bg-primary ms-1">TS<%= zstg.system_talk_group.timeslot %></span>
+                                  <% if @zone.editable_by?(current_user) %>
+                                    <%= button_to zone_zone_system_zone_system_talkgroup_path(@zone, zone_system, zstg),
+                                        method: :delete,
+                                        class: "btn btn-sm p-0 ms-1 text-danger",
+                                        form: { class: "d-inline" },
+                                        data: { turbo_confirm: "Remove this talkgroup?" } do %>
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                      </svg>
+                                    <% end %>
+                                  <% end %>
+                                </span>
+                              <% end %>
+                            </div>
+                          <% else %>
+                            <span class="text-muted ms-1">None selected</span>
+                          <% end %>
+                          <% if @zone.editable_by?(current_user) %>
+                            <% available_talkgroups = zone_system.system.system_talk_groups.includes(:talk_group).where.not(id: zone_system.zone_system_talkgroups.pluck(:system_talk_group_id)) %>
+                            <% if available_talkgroups.any? %>
+                              <div class="mt-2">
+                                <%= form_with(model: zone_system.zone_system_talkgroups.new, url: zone_zone_system_zone_system_talkgroups_path(@zone, zone_system), method: :post, local: true, class: "d-flex gap-2 align-items-center") do |f| %>
+                                  <%= f.select :system_talk_group_id,
+                                      available_talkgroups.map { |stg| ["#{stg.talk_group.name} (#{stg.talk_group.talkgroup_number}) - TS#{stg.timeslot}", stg.id] },
+                                      { prompt: "Select talkgroup..." },
+                                      { class: "form-select form-select-sm", style: "width: auto;" } %>
+                                  <%= f.submit "Add Talkgroup", class: "btn btn-sm btn-outline-primary" %>
+                                <% end %>
+                              </div>
+                            <% end %>
+                          <% end %>
+                        </div>
                       <% end %>
                     </div>
                     <span class="badge bg-secondary me-2"><%= zone_system.position %></span>
