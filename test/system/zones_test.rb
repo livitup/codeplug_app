@@ -429,4 +429,155 @@ class ZonesTest < ApplicationSystemTestCase
     assert_text "Updated Name"
     assert_text "Updated Long Name"
   end
+
+  # Talkgroup selection tests for digital systems
+  test "digital system in zone shows talkgroup management" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    zone = create(:zone, user: user, name: "DMR Zone")
+
+    # Create DMR system with network
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", color_code: 1, name: "DMR Repeater")
+    dmr_system.networks << dmr_network
+
+    # Create talkgroups
+    tg1 = create(:talk_group, name: "Local", talkgroup_number: "3100", network: dmr_network)
+    tg2 = create(:talk_group, name: "TAC 1", talkgroup_number: "8951", network: dmr_network)
+    create(:system_talk_group, system: dmr_system, talk_group: tg1, timeslot: 1)
+    create(:system_talk_group, system: dmr_system, talk_group: tg2, timeslot: 2)
+
+    # Add system to zone
+    create(:zone_system, zone: zone, system: dmr_system, position: 1)
+
+    visit zone_path(zone)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "DMR Repeater"
+    assert_selector ".badge", text: "DMR"
+    # Should show "Add Talkgroup" option for digital systems
+    assert_text "Talkgroups"
+    assert_button "Add Talkgroup"
+  end
+
+  test "user can add talkgroup to digital system in zone" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    zone = create(:zone, user: user, name: "DMR Zone")
+
+    # Create DMR system with network
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", color_code: 1, name: "DMR Repeater")
+    dmr_system.networks << dmr_network
+
+    # Create talkgroup
+    tg = create(:talk_group, name: "Local", talkgroup_number: "3100", network: dmr_network)
+    create(:system_talk_group, system: dmr_system, talk_group: tg, timeslot: 1)
+
+    # Add system to zone
+    create(:zone_system, zone: zone, system: dmr_system, position: 1)
+
+    visit zone_path(zone)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Verify the form is present
+    assert_text "None selected"
+    assert_button "Add Talkgroup"
+
+    # Select and add talkgroup using the select element
+    select "Local (3100) - TS1", from: "zone_system_talk_group[system_talk_group_id]"
+    click_button "Add Talkgroup"
+
+    assert_text "Talkgroup was successfully added"
+    assert_selector ".badge.bg-primary", text: "TS1"
+  end
+
+  test "user can remove talkgroup from digital system in zone" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    zone = create(:zone, user: user, name: "DMR Zone")
+
+    # Create DMR system with network
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", color_code: 1, name: "DMR Repeater")
+    dmr_system.networks << dmr_network
+
+    # Create talkgroup
+    tg = create(:talk_group, name: "Local", talkgroup_number: "3100", network: dmr_network)
+    stg = create(:system_talk_group, system: dmr_system, talk_group: tg, timeslot: 1)
+
+    # Add system and talkgroup to zone
+    zone_system = create(:zone_system, zone: zone, system: dmr_system, position: 1)
+    create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg)
+
+    visit zone_path(zone)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Verify talkgroup is displayed
+    assert_text "Local"
+    assert_selector ".badge", text: "TS1"
+
+    # Remove talkgroup by clicking the X button within the talkgroup badge
+    within(".badge.bg-light") do
+      accept_confirm do
+        find("button.text-danger").click
+      end
+    end
+
+    assert_text "Talkgroup was successfully removed"
+  end
+
+  test "talkgroup displays show timeslot correctly" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    zone = create(:zone, user: user, name: "DMR Zone")
+
+    # Create DMR system with network
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", color_code: 1, name: "DMR Repeater")
+    dmr_system.networks << dmr_network
+
+    # Create talkgroups with different timeslots
+    tg1 = create(:talk_group, name: "Local", talkgroup_number: "3100", network: dmr_network)
+    tg2 = create(:talk_group, name: "TAC 1", talkgroup_number: "8951", network: dmr_network)
+    stg1 = create(:system_talk_group, system: dmr_system, talk_group: tg1, timeslot: 1)
+    stg2 = create(:system_talk_group, system: dmr_system, talk_group: tg2, timeslot: 2)
+
+    # Add system and talkgroups to zone
+    zone_system = create(:zone_system, zone: zone, system: dmr_system, position: 1)
+    create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg1)
+    create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: stg2)
+
+    visit zone_path(zone)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Verify both talkgroups display with correct timeslots
+    assert_text "Local"
+    assert_text "TAC 1"
+    assert_selector ".badge", text: "TS1"
+    assert_selector ".badge", text: "TS2"
+  end
+
+  test "analog system in zone does not show talkgroup options" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    zone = create(:zone, user: user, name: "Analog Zone")
+
+    # Create analog system
+    analog_system = create(:system, mode: "analog", name: "Analog Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+
+    visit zone_path(zone)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "Analog Repeater"
+    assert_selector ".badge", text: "ANALOG"
+    # Should NOT show talkgroup options for analog systems
+    assert_no_button "Add Talkgroup"
+  end
 end
