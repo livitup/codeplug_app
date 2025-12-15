@@ -36,6 +36,26 @@ class CodeplugZonesController < ApplicationController
     redirect_to codeplug_path(@codeplug), notice: "Zone was successfully removed from codeplug."
   end
 
+  def update_positions
+    positions_params = params.permit(positions: [ :id, :position ])
+
+    ActiveRecord::Base.transaction do
+      # First pass: Set temporary positions to avoid uniqueness conflicts
+      positions_params[:positions].each_with_index do |position_data, index|
+        codeplug_zone = @codeplug.codeplug_zones.unscoped.find(position_data[:id])
+        codeplug_zone.update_column(:position, 1000 + index)
+      end
+
+      # Second pass: Set actual positions
+      positions_params[:positions].each do |position_data|
+        codeplug_zone = @codeplug.codeplug_zones.unscoped.find(position_data[:id])
+        codeplug_zone.update!(position: position_data[:position])
+      end
+    end
+
+    head :ok
+  end
+
   private
 
   def set_codeplug

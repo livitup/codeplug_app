@@ -74,10 +74,21 @@
 
           <% if @codeplug.codeplug_zones.any? %>
             <p class="text-muted mb-2"><strong><%= pluralize(@codeplug.codeplug_zones.count, "zone") %></strong></p>
-            <div class="list-group">
+            <div class="list-group"
+                 <% if @codeplug.user == current_user %>
+                 data-controller="sortable"
+                 data-sortable-url-value="<%= update_positions_codeplug_codeplug_zones_path(@codeplug) %>"
+                 <% end %>>
               <% @codeplug.codeplug_zones.includes(zone: :zone_systems).each do |codeplug_zone| %>
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
+                <div class="list-group-item d-flex justify-content-between align-items-center" data-id="<%= codeplug_zone.id %>">
+                  <div class="d-flex align-items-center">
+                    <% if @codeplug.user == current_user %>
+                      <span class="drag-handle me-3" style="cursor: grab;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
+                          <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                        </svg>
+                      </span>
+                    <% end %>
                     <span class="badge bg-secondary me-2"><%= codeplug_zone.position %></span>
                     <strong><%= codeplug_zone.zone.name %></strong>
                     <span class="badge bg-info ms-2"><%= pluralize(codeplug_zone.zone.zone_systems.count, "system") %></span>
