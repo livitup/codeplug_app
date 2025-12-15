@@ -155,4 +155,49 @@ class CodeplugZonesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to login_path
   end
+
+  # Update Positions Action Tests
+  test "should update zone positions" do
+    log_in_as(@user)
+    cz1 = create(:codeplug_zone, codeplug: @codeplug, zone: @my_zone, position: 1)
+    cz2 = create(:codeplug_zone, codeplug: @codeplug, zone: @my_zone2, position: 2)
+    cz3 = create(:codeplug_zone, codeplug: @codeplug, zone: @public_zone, position: 3)
+
+    # Reorder: move zone3 to position 1
+    patch update_positions_codeplug_codeplug_zones_path(@codeplug), params: {
+      positions: [
+        { id: cz3.id, position: 1 },
+        { id: cz1.id, position: 2 },
+        { id: cz2.id, position: 3 }
+      ]
+    }, as: :json
+
+    assert_response :success
+
+    # Verify positions updated
+    assert_equal 1, cz3.reload.position
+    assert_equal 2, cz1.reload.position
+    assert_equal 3, cz2.reload.position
+  end
+
+  test "should not update positions for other user's codeplug" do
+    log_in_as(@user)
+    cz = create(:codeplug_zone, codeplug: @other_codeplug, zone: @public_zone, position: 1)
+
+    patch update_positions_codeplug_codeplug_zones_path(@other_codeplug), params: {
+      positions: [
+        { id: cz.id, position: 2 }
+      ]
+    }, as: :json
+
+    assert_response :forbidden
+  end
+
+  test "should require login for update_positions" do
+    patch update_positions_codeplug_codeplug_zones_path(@codeplug), params: {
+      positions: []
+    }, as: :json
+
+    assert_redirected_to login_path
+  end
 end
