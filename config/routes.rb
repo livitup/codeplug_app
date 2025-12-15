@@ -43,6 +43,8 @@ Rails.application.routes.draw do
 
   # Codeplugs and channels (nested)
   resources :codeplugs do
+    # Add standalone zones to codeplugs
+    resources :codeplug_zones, only: [ :create, :destroy ]
     # Nested zones routes (kept for backward compatibility, will be deprecated)
     resources :zones do
       resources :channel_zones, only: [ :create, :destroy ]

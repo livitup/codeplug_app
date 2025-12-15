@@ -218,4 +218,126 @@ class CodeplugsTest < ApplicationSystemTestCase
     assert_current_path codeplug_channels_path(codeplug)
     assert_text "Channels - Test Codeplug"
   end
+
+  # Standalone zones in codeplug tests
+  test "codeplug show page displays standalone zones section" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create standalone zones and add to codeplug
+    zone1 = create(:zone, user: user, name: "Zone 1", public: false)
+    zone2 = create(:zone, user: user, name: "Zone 2", public: false)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 2)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "Standalone Zones"
+    assert_text "Zone 1"
+    assert_text "Zone 2"
+    assert_text "2 zones"
+  end
+
+  test "user can add own zone to codeplug" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+    zone = create(:zone, user: user, name: "My Zone", public: false)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Select and add zone (includes system count in option text)
+    select "My Zone (0 systems)", from: "codeplug_zone[zone_id]"
+    click_button "Add Zone"
+
+    assert_text "Zone was successfully added to codeplug"
+    within("#standalone-zones-section") do
+      assert_text "My Zone"
+    end
+  end
+
+  test "user can add public zone to codeplug" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    other_user = create(:user)
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+    public_zone = create(:zone, user: other_user, name: "Public Zone", public: true)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Select and add public zone (includes system count in option text)
+    select "Public Zone (0 systems)", from: "codeplug_zone[zone_id]"
+    click_button "Add Zone"
+
+    assert_text "Zone was successfully added to codeplug"
+    within("#standalone-zones-section") do
+      assert_text "Public Zone"
+    end
+  end
+
+  test "user can remove zone from codeplug" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+    zone = create(:zone, user: user, name: "My Zone", public: false)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "My Zone"
+
+    # Remove zone - use within to scope to the standalone zones section
+    within("#standalone-zones-section") do
+      accept_confirm do
+        click_button "Remove"
+      end
+    end
+
+    assert_text "Zone was successfully removed from codeplug"
+  end
+
+  test "codeplug standalone zones shows system count for each zone" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create zone with systems
+    zone = create(:zone, user: user, name: "My Zone", public: false)
+    system1 = create(:system, name: "System 1")
+    system2 = create(:system, name: "System 2")
+    create(:zone_system, zone: zone, system: system1, position: 1)
+    create(:zone_system, zone: zone, system: system2, position: 2)
+
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "My Zone"
+    assert_selector ".badge", text: "2 systems"
+  end
+
+  test "codeplug standalone zones empty state shows helpful message" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within("#standalone-zones-section") do
+      assert_text "No standalone zones added yet"
+    end
+  end
 end
