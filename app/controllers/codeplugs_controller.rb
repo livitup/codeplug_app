@@ -1,6 +1,6 @@
 class CodeplugsController < ApplicationController
-  before_action :set_codeplug, only: [ :show, :edit, :update, :destroy ]
-  before_action :authorize_codeplug, only: [ :edit, :update, :destroy ]
+  before_action :set_codeplug, only: [ :show, :edit, :update, :destroy, :generate_channels ]
+  before_action :authorize_codeplug, only: [ :edit, :update, :destroy, :generate_channels ]
   before_action :authorize_view, only: [ :show ]
 
   def index
@@ -40,6 +40,25 @@ class CodeplugsController < ApplicationController
   def destroy
     @codeplug.destroy!
     redirect_to codeplugs_path, notice: "Codeplug was successfully deleted."
+  end
+
+  def generate_channels
+    # Check if channels already exist and confirmation is required
+    if @codeplug.channels.any? && params[:confirm_regenerate] != "true"
+      redirect_to codeplug_path(@codeplug), alert: "This codeplug already has #{@codeplug.channels.count} channel(s). Please confirm regeneration to replace them."
+      return
+    end
+
+    regenerate = @codeplug.channels.any?
+    generator = ChannelGenerator.new(@codeplug)
+    result = generator.generate_channels(regenerate: regenerate)
+
+    if result[:skipped]
+      redirect_to codeplug_path(@codeplug), alert: "Channel generation was skipped."
+    else
+      message = "Successfully generated #{result[:channels_created]} channel(s) from #{result[:zones_processed]} zone(s)."
+      redirect_to codeplug_path(@codeplug), notice: message
+    end
   end
 
   private

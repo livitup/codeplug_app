@@ -240,4 +240,113 @@ class CodeplugsControllerTest < ActionDispatch::IntegrationTest
     @codeplug.reload
     assert @codeplug.public
   end
+
+  # Generate Channels Action Tests
+  test "should generate channels for own codeplug" do
+    log_in_as(@user)
+
+    # Set up a zone with an analog system
+    zone = create(:zone, user: @user, name: "Test Zone")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone, position: 1)
+    analog_system = create(:system, :analog, name: "W4BK Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+
+    assert_difference "Channel.count", 1 do
+      post generate_channels_codeplug_path(@codeplug)
+    end
+
+    assert_redirected_to codeplug_path(@codeplug)
+    assert_match /generated 1 channel/, flash[:notice]
+  end
+
+  test "should not generate channels for other user's codeplug" do
+    log_in_as(@user)
+
+    assert_no_difference "Channel.count" do
+      post generate_channels_codeplug_path(@other_codeplug)
+    end
+
+    assert_redirected_to codeplugs_path
+  end
+
+  test "should require login for generate_channels" do
+    post generate_channels_codeplug_path(@codeplug)
+    assert_redirected_to login_path
+  end
+
+  test "should skip generation if channels exist and no confirmation" do
+    log_in_as(@user)
+
+    # Create an existing channel
+    system = create(:system, :analog)
+    create(:channel, codeplug: @codeplug, system: system, name: "Existing Channel")
+
+    # Set up a zone
+    zone = create(:zone, user: @user, name: "Test Zone")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone, position: 1)
+    analog_system = create(:system, :analog, name: "W4BK Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+
+    assert_no_difference "Channel.count" do
+      post generate_channels_codeplug_path(@codeplug)
+    end
+
+    assert_redirected_to codeplug_path(@codeplug)
+    assert_match /already has.*channel/, flash[:alert]
+  end
+
+  test "should regenerate channels with confirmation" do
+    log_in_as(@user)
+
+    # Create an existing channel
+    system = create(:system, :analog)
+    existing_channel = create(:channel, codeplug: @codeplug, system: system, name: "Existing Channel")
+
+    # Set up a zone with 2 systems
+    zone = create(:zone, user: @user, name: "Test Zone")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone, position: 1)
+    analog_system1 = create(:system, :analog, name: "System 1")
+    analog_system2 = create(:system, :analog, name: "System 2")
+    create(:zone_system, zone: zone, system: analog_system1, position: 1)
+    create(:zone_system, zone: zone, system: analog_system2, position: 2)
+
+    # Should regenerate (delete 1 old, create 2 new = net +1)
+    assert_difference "Channel.count", 1 do
+      post generate_channels_codeplug_path(@codeplug), params: { confirm_regenerate: "true" }
+    end
+
+    assert_redirected_to codeplug_path(@codeplug)
+    assert_match /generated 2 channel/, flash[:notice]
+    assert_not Channel.exists?(existing_channel.id)
+  end
+
+  test "should show message when no zones to generate from" do
+    log_in_as(@user)
+
+    post generate_channels_codeplug_path(@codeplug)
+
+    assert_redirected_to codeplug_path(@codeplug)
+    assert_match /0 channel|0 zone/, flash[:notice]
+  end
+
+  test "should generate channels from multiple zones" do
+    log_in_as(@user)
+
+    # Set up 2 zones with systems
+    zone1 = create(:zone, user: @user, name: "Zone 1")
+    zone2 = create(:zone, user: @user, name: "Zone 2")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone1, position: 1)
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone2, position: 2)
+
+    analog_system1 = create(:system, :analog, name: "System 1")
+    analog_system2 = create(:system, :analog, name: "System 2")
+    create(:zone_system, zone: zone1, system: analog_system1, position: 1)
+    create(:zone_system, zone: zone2, system: analog_system2, position: 1)
+
+    assert_difference "Channel.count", 2 do
+      post generate_channels_codeplug_path(@codeplug)
+    end
+
+    assert_match /generated 2 channel.*2 zone/, flash[:notice]
+  end
 end

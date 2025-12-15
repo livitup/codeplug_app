@@ -340,4 +340,121 @@ class CodeplugsTest < ApplicationSystemTestCase
       assert_text "No standalone zones added yet"
     end
   end
+
+  # Generate Channels tests
+  test "generate channels button is shown when zones exist" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create a zone with a system
+    zone = create(:zone, user: user, name: "Test Zone", public: false)
+    analog_system = create(:system, :analog, name: "W4BK Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_button "Generate Channels"
+  end
+
+  test "user can generate channels from zones" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create a zone with an analog system
+    zone = create(:zone, user: user, name: "Test Zone", public: false)
+    analog_system = create(:system, :analog, name: "W4BK Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    click_button "Generate Channels"
+
+    assert_text "Successfully generated 1 channel"
+    within("#channels-section") do
+      assert_text "W4BK Repeater"
+    end
+  end
+
+  test "generate channels button not shown when no zones" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    within("#standalone-zones-section") do
+      assert_text "Add zones above to generate channels"
+    end
+    assert_no_button "Generate Channels"
+  end
+
+  test "regenerate channels shows confirmation modal" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create existing channel
+    system = create(:system, :analog, name: "Old System")
+    create(:channel, codeplug: codeplug, system: system, name: "Old Channel")
+
+    # Create a zone with a system
+    zone = create(:zone, user: user, name: "Test Zone", public: false)
+    analog_system = create(:system, :analog, name: "New System")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Should show Regenerate button when channels exist
+    assert_button "Regenerate Channels"
+    assert_text "1 channel currently configured"
+  end
+
+  test "user can regenerate channels after confirmation" do
+    user = create(:user, email: "test@example.com", password: "password123")
+    codeplug = create(:codeplug, user: user, name: "Test Codeplug")
+
+    # Create existing channel
+    system = create(:system, :analog, name: "Old System")
+    create(:channel, codeplug: codeplug, system: system, name: "Old Channel")
+
+    # Create a zone with a system
+    zone = create(:zone, user: user, name: "Test Zone", public: false)
+    analog_system = create(:system, :analog, name: "New System")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    visit codeplug_path(codeplug)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    # Click regenerate button to open modal
+    click_button "Regenerate Channels"
+
+    # Modal should be visible
+    within("#regenerateChannelsModal") do
+      assert_text "Regenerate Channels?"
+      assert_text "This will delete all 1 existing channel"
+      click_button "Regenerate Channels"
+    end
+
+    assert_text "Successfully generated 1 channel"
+    within("#channels-section") do
+      assert_text "New System"
+      assert_no_text "Old Channel"
+    end
+  end
 end
