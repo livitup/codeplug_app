@@ -62,6 +62,43 @@ class ChannelGeneratorTest < ActiveSupport::TestCase
     assert_equal "W4BK Repeater", channel.name
   end
 
+  test "generated channel has source_zone_id set" do
+    zone = create(:zone, user: @user, name: "Test Zone")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone, position: 1)
+
+    analog_system = create(:system, :analog, name: "W4BK Repeater")
+    create(:zone_system, zone: zone, system: analog_system, position: 1)
+
+    generator = ChannelGenerator.new(@codeplug)
+    generator.generate_channels
+
+    channel = @codeplug.channels.first
+    assert_equal zone.id, channel.source_zone_id
+    assert channel.generated?
+  end
+
+  test "digital channel has source_zone_id set" do
+    zone = create(:zone, user: @user, name: "DMR Zone")
+    create(:codeplug_zone, codeplug: @codeplug, zone: zone, position: 1)
+
+    dmr_network = create(:network, network_type: "Digital-DMR")
+    dmr_system = create(:system, mode: "dmr", name: "W4BK DMR", color_code: 1)
+    dmr_system.networks << dmr_network
+
+    talkgroup = create(:talk_group, network: dmr_network, name: "Virginia", talkgroup_number: "3151")
+    system_tg = create(:system_talk_group, system: dmr_system, talk_group: talkgroup, timeslot: 1)
+
+    zone_system = create(:zone_system, zone: zone, system: dmr_system, position: 1)
+    create(:zone_system_talk_group, zone_system: zone_system, system_talk_group: system_tg)
+
+    generator = ChannelGenerator.new(@codeplug)
+    generator.generate_channels
+
+    channel = @codeplug.channels.first
+    assert_equal zone.id, channel.source_zone_id
+    assert channel.generated?
+  end
+
   # Digital system tests
   test "generates one channel per talkgroup for digital systems" do
     zone = create(:zone, user: @user, name: "DMR Zone")

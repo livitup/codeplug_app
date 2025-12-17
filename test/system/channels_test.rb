@@ -182,4 +182,81 @@ class ChannelsTest < ApplicationSystemTestCase
     # Should see the talkgroup in dropdown
     assert_selector "option", text: /Test TG/
   end
+
+  # Generated channel customization tests
+  test "generated channel shows Generated badge on show page" do
+    zone = create(:zone, user: @user, name: "Source Zone")
+    analog_system = create(:system, :analog, name: "Test System")
+    channel = create(:channel, codeplug: @codeplug, system: analog_system, name: "Generated Channel", source_zone: zone)
+
+    visit codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_selector ".badge", text: "Generated"
+    assert_text "Source Zone"
+  end
+
+  test "generated channel shows context info on edit page" do
+    zone = create(:zone, user: @user, name: "My Source Zone")
+    analog_system = create(:system, :analog, name: "Test System")
+    channel = create(:channel, codeplug: @codeplug, system: analog_system, name: "Generated Channel", source_zone: zone)
+
+    visit edit_codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_text "Generated Channel"
+    assert_text "My Source Zone"
+    assert_text "Changes will persist until you regenerate channels"
+  end
+
+  test "user can edit generated channel name" do
+    zone = create(:zone, user: @user, name: "Source Zone")
+    analog_system = create(:system, :analog, name: "Test System")
+    channel = create(:channel, codeplug: @codeplug, system: analog_system, name: "Original Name", source_zone: zone)
+
+    visit edit_codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    fill_in "Name", with: "Custom Name"
+    click_button "Update Channel"
+
+    assert_text "Channel was successfully updated"
+    assert_text "Custom Name"
+  end
+
+  test "user can change generated channel power level" do
+    zone = create(:zone, user: @user, name: "Source Zone")
+    analog_system = create(:system, :analog, name: "Test System")
+    channel = create(:channel, codeplug: @codeplug, system: analog_system, name: "Test Channel", source_zone: zone, power_level: "High")
+
+    visit edit_codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    select "Low", from: "Power level"
+    click_button "Update Channel"
+
+    assert_text "Channel was successfully updated"
+    channel.reload
+    assert_equal "Low", channel.power_level
+  end
+
+  test "manually created channel does not show Generated badge" do
+    analog_system = create(:system, :analog, name: "Test System")
+    channel = create(:channel, codeplug: @codeplug, system: analog_system, name: "Manual Channel", source_zone: nil)
+
+    visit codeplug_channel_path(@codeplug, channel)
+    fill_in "Email", with: "test@example.com"
+    fill_in "Password", with: "password123"
+    click_button "Log In"
+
+    assert_no_selector ".badge", text: "Generated"
+  end
 end
