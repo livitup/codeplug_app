@@ -168,6 +168,33 @@
     max-width: 200px;
   }
 
+  /* Ensure the list-group has a minimum height for dropping even when empty */
+  .layout-builder-container .list-group {
+    min-height: 150px;
+    border: 2px dashed #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  .layout-builder-container .list-group:empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Highlight the drop zone when dragging over it */
+  .layout-builder-container .list-group.sortable-ghost-class,
+  .layout-builder-container .list-group:has(.sortable-ghost) {
+    border-color: #0d6efd;
+    background-color: #f8f9ff;
+  }
+
+  .layout-builder-container .list-group:not(:empty) {
+    border-style: solid;
+    border-color: #dee2e6;
+  }
+
   .layout-builder-container .list-group:not(:empty) + .empty-message {
     display: none;
   }
