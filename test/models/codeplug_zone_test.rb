@@ -73,8 +73,9 @@ class CodeplugZoneTest < ActiveSupport::TestCase
 
   # Uniqueness Tests
   test "should not save codeplug_zone with duplicate zone in same codeplug" do
-    codeplug = create(:codeplug)
-    zone = create(:zone, codeplug: codeplug)
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone = create(:zone, user: user)
     create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
 
     duplicate = build(:codeplug_zone, codeplug: codeplug, zone: zone, position: 2)
@@ -83,21 +84,22 @@ class CodeplugZoneTest < ActiveSupport::TestCase
   end
 
   test "should save codeplug_zone with same zone in different codeplugs" do
-    codeplug1 = create(:codeplug)
-    codeplug2 = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug1)
-    zone2 = create(:zone, codeplug: codeplug2)
+    user = create(:user)
+    codeplug1 = create(:codeplug, user: user)
+    codeplug2 = create(:codeplug, user: user)
+    zone = create(:zone, user: user)
 
-    cz1 = create(:codeplug_zone, codeplug: codeplug1, zone: zone1, position: 1)
-    cz2 = build(:codeplug_zone, codeplug: codeplug2, zone: zone2, position: 1)
+    cz1 = create(:codeplug_zone, codeplug: codeplug1, zone: zone, position: 1)
+    cz2 = build(:codeplug_zone, codeplug: codeplug2, zone: zone, position: 1)
 
-    assert cz2.save, "Failed to save same zone in different codeplug"
+    assert cz2.save, "Failed to save same zone in different codeplugs"
   end
 
   test "should not save codeplug_zone with duplicate position in same codeplug" do
-    codeplug = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug, name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, name: "Zone 2")
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user, name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2")
     create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
 
     duplicate = build(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 1)
@@ -106,10 +108,11 @@ class CodeplugZoneTest < ActiveSupport::TestCase
   end
 
   test "should save codeplug_zone with same position in different codeplugs" do
-    codeplug1 = create(:codeplug)
-    codeplug2 = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug1)
-    zone2 = create(:zone, codeplug: codeplug2)
+    user = create(:user)
+    codeplug1 = create(:codeplug, user: user)
+    codeplug2 = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user)
+    zone2 = create(:zone, user: user)
 
     cz1 = create(:codeplug_zone, codeplug: codeplug1, zone: zone1, position: 1)
     cz2 = build(:codeplug_zone, codeplug: codeplug2, zone: zone2, position: 1)
@@ -125,10 +128,11 @@ class CodeplugZoneTest < ActiveSupport::TestCase
 
   # Multiple CodeplugZones per Codeplug
   test "codeplug can have multiple codeplug_zones at different positions" do
-    codeplug = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug, name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, name: "Zone 2")
-    zone3 = create(:zone, codeplug: codeplug, name: "Zone 3")
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user, name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2")
+    zone3 = create(:zone, user: user, name: "Zone 3")
 
     cz1 = create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
     cz2 = create(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 2)
@@ -142,10 +146,11 @@ class CodeplugZoneTest < ActiveSupport::TestCase
 
   # Default Scope - Ordering by Position
   test "codeplug_zones should be ordered by position by default" do
-    codeplug = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug, name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, name: "Zone 2")
-    zone3 = create(:zone, codeplug: codeplug, name: "Zone 3")
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user, name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2")
+    zone3 = create(:zone, user: user, name: "Zone 3")
 
     # Create in non-sequential order
     cz3 = create(:codeplug_zone, codeplug: codeplug, zone: zone3, position: 3)
@@ -158,9 +163,10 @@ class CodeplugZoneTest < ActiveSupport::TestCase
 
   # Through Association Tests
   test "codeplug should have zones through codeplug_zones" do
-    codeplug = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug, name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, name: "Zone 2")
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user, name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2")
 
     create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
     create(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 2)
@@ -171,9 +177,10 @@ class CodeplugZoneTest < ActiveSupport::TestCase
   end
 
   test "zone should have codeplugs through codeplug_zones" do
-    zone = create(:zone)
-    codeplug1 = create(:codeplug)
-    codeplug2 = create(:codeplug)
+    user = create(:user)
+    zone = create(:zone, user: user)
+    codeplug1 = create(:codeplug, user: user)
+    codeplug2 = create(:codeplug, user: user)
 
     create(:codeplug_zone, zone: zone, codeplug: codeplug1, position: 1)
     create(:codeplug_zone, zone: zone, codeplug: codeplug2, position: 1)

@@ -7,11 +7,6 @@ class ZoneTest < ActiveSupport::TestCase
     assert zone.save, "Failed to save zone with valid attributes"
   end
 
-  test "should save zone without codeplug (codeplug is now optional)" do
-    zone = build(:zone, codeplug: nil)
-    assert zone.save, "Failed to save zone without codeplug"
-  end
-
   test "should not save zone without user" do
     zone = build(:zone, user: nil)
     assert_not zone.save, "Saved zone without user"
@@ -35,17 +30,6 @@ class ZoneTest < ActiveSupport::TestCase
   end
 
   # Association Tests
-  test "should belong to codeplug" do
-    zone = build(:zone)
-    assert_respond_to zone, :codeplug
-  end
-
-  test "codeplug association should be configured" do
-    association = Zone.reflect_on_association(:codeplug)
-    assert_not_nil association, "codeplug association should exist"
-    assert_equal :belongs_to, association.macro
-  end
-
   test "should have many channel_zones" do
     zone = create(:zone)
     assert_respond_to zone, :channel_zones
@@ -70,12 +54,45 @@ class ZoneTest < ActiveSupport::TestCase
     assert_equal :channel_zones, association.options[:through]
   end
 
-  # Dependent Destroy Tests
-  test "destroying zone should destroy associated channel_zones" do
+  test "should have many codeplug_zones" do
     zone = create(:zone)
-    # Note: ChannelZone will be created in a later issue, so this test will fail until then
-    # For now, we're just testing the association configuration exists
-    skip "ChannelZone model not yet implemented"
+    assert_respond_to zone, :codeplug_zones
+  end
+
+  test "codeplug_zones association should be configured with dependent destroy" do
+    association = Zone.reflect_on_association(:codeplug_zones)
+    assert_not_nil association, "codeplug_zones association should exist"
+    assert_equal :has_many, association.macro
+    assert_equal :destroy, association.options[:dependent]
+  end
+
+  test "should have many codeplugs through codeplug_zones" do
+    zone = create(:zone)
+    assert_respond_to zone, :codeplugs
+  end
+
+  test "codeplugs association should be configured as through" do
+    association = Zone.reflect_on_association(:codeplugs)
+    assert_not_nil association, "codeplugs association should exist"
+    assert_equal :has_many, association.macro
+    assert_equal :codeplug_zones, association.options[:through]
+  end
+
+  test "should have many zone_systems" do
+    zone = create(:zone)
+    assert_respond_to zone, :zone_systems
+  end
+
+  test "zone_systems association should be configured with dependent destroy" do
+    association = Zone.reflect_on_association(:zone_systems)
+    assert_not_nil association, "zone_systems association should exist"
+    assert_equal :has_many, association.macro
+    assert_equal :destroy, association.options[:dependent]
+  end
+
+  test "should have many systems through zone_systems" do
+    zone = create(:zone)
+    assert_respond_to zone, :systems
   end
 
   # Attribute Tests
@@ -92,27 +109,6 @@ class ZoneTest < ActiveSupport::TestCase
   test "should store short_name as string" do
     zone = create(:zone, short_name: "RPT")
     assert_equal "RPT", zone.short_name
-  end
-
-  test "should allow different zones with same name in different codeplugs" do
-    codeplug1 = create(:codeplug)
-    codeplug2 = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug1, name: "Zone A")
-    zone2 = create(:zone, codeplug: codeplug2, name: "Zone A")
-
-    assert zone1.persisted?
-    assert zone2.persisted?
-  end
-
-  # Multiple Zones per Codeplug
-  test "codeplug can have multiple zones" do
-    codeplug = create(:codeplug)
-    zone1 = create(:zone, codeplug: codeplug, name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, name: "Zone 2")
-
-    assert_equal 2, codeplug.zones.count
-    assert_includes codeplug.zones, zone1
-    assert_includes codeplug.zones, zone2
   end
 
   # Name Length Tests (no validation, just storage)
@@ -270,10 +266,32 @@ class ZoneTest < ActiveSupport::TestCase
     assert zone2.persisted?
   end
 
-  # Codeplug Optional Tests
-  test "zone can exist without being associated to a codeplug" do
-    zone = create(:zone, codeplug: nil)
-    assert_nil zone.codeplug
-    assert zone.persisted?
+  # Codeplug Relationship Tests (through CodeplugZone)
+  test "zone can be added to multiple codeplugs" do
+    user = create(:user)
+    zone = create(:zone, user: user)
+    codeplug1 = create(:codeplug, user: user)
+    codeplug2 = create(:codeplug, user: user)
+
+    create(:codeplug_zone, codeplug: codeplug1, zone: zone, position: 1)
+    create(:codeplug_zone, codeplug: codeplug2, zone: zone, position: 1)
+
+    assert_equal 2, zone.codeplugs.count
+    assert_includes zone.codeplugs, codeplug1
+    assert_includes zone.codeplugs, codeplug2
+  end
+
+  test "codeplug can have multiple zones" do
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone1 = create(:zone, user: user, name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2")
+
+    create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 2)
+
+    assert_equal 2, codeplug.zones.count
+    assert_includes codeplug.zones, zone1
+    assert_includes codeplug.zones, zone2
   end
 end

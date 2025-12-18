@@ -2,13 +2,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><%= @zone.name %></h1>
     <div>
-      <% if @codeplug %>
-        <%= link_to "Edit", edit_codeplug_zone_path(@codeplug, @zone), class: "btn btn-secondary me-2" %>
-        <%= button_to "Delete", codeplug_zone_path(@codeplug, @zone), method: :delete,
-            class: "btn btn-danger",
-            form: { class: "d-inline" },
-            data: { turbo_confirm: "Are you sure?" } %>
-      <% elsif @zone.editable_by?(current_user) %>
+      <% if @zone.editable_by?(current_user) %>
         <%= link_to "Edit", edit_zone_path(@zone), class: "btn btn-secondary me-2" %>
         <%= button_to "Delete", zone_path(@zone), method: :delete,
             class: "btn btn-danger",
@@ -18,11 +12,7 @@
     </div>
   </div>
 
-  <% if @codeplug %>
-    <%= link_to "← Back to Zones", codeplug_zones_path(@codeplug), class: "btn btn-secondary mb-3" %>
-  <% else %>
-    <%= link_to "← Back to Zones", zones_path, class: "btn btn-secondary mb-3" %>
-  <% end %>
+  <%= link_to "← Back to Zones", zones_path, class: "btn btn-secondary mb-3" %>
 
   <div class="card mb-4">
     <div class="card-body">
@@ -40,202 +30,135 @@
         </div>
       </div>
 
-      <% unless @codeplug %>
-        <div class="row mb-3">
-          <div class="col-md-4">
-            <strong>Owner:</strong> <%= @zone.user.email %>
-          </div>
-          <div class="col-md-4">
-            <strong>Visibility:</strong>
-            <% if @zone.public? %>
-              <span class="badge bg-success">Public</span>
-            <% else %>
-              <span class="badge bg-secondary">Private</span>
-            <% end %>
-          </div>
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <strong>Owner:</strong> <%= @zone.user.email %>
         </div>
-      <% end %>
+        <div class="col-md-4">
+          <strong>Visibility:</strong>
+          <% if @zone.public? %>
+            <span class="badge bg-success">Public</span>
+          <% else %>
+            <span class="badge bg-secondary">Private</span>
+          <% end %>
+        </div>
+      </div>
     </div>
   </div>
 
-  <% if @codeplug %>
-    <div class="card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">Channels</h5>
-        </div>
+  <div class="card">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-title mb-0">Systems</h5>
+      </div>
 
-        <% if @available_channels.any? %>
+      <% if @zone.editable_by?(current_user) %>
+        <% available_systems = System.where.not(id: @zone.zone_systems.pluck(:system_id)).order(:name) %>
+        <% if available_systems.any? %>
           <div class="card mb-3 bg-light">
             <div class="card-body">
-              <%= form_with(model: @zone.channel_zones.new, url: codeplug_zone_channel_zones_path(@codeplug, @zone), method: :post, local: true, class: "row g-3") do |f| %>
+              <%= form_with(model: @zone.zone_systems.new, url: zone_zone_systems_path(@zone), method: :post, local: true, class: "row g-3") do |f| %>
                 <div class="col-auto flex-grow-1">
-                  <%= f.select :channel_id,
-                      options_from_collection_for_select(@available_channels, :id, :long_name),
-                      { prompt: "Select a channel to add..." },
+                  <%= f.select :system_id,
+                      options_from_collection_for_select(available_systems, :id, :name),
+                      { prompt: "Select a system to add..." },
                       { class: "form-select" } %>
                 </div>
                 <div class="col-auto">
-                  <%= f.submit "Add Channel", class: "btn btn-primary" %>
+                  <%= f.submit "Add System", class: "btn btn-primary" %>
                 </div>
               <% end %>
             </div>
           </div>
         <% end %>
+      <% end %>
 
-        <% if @zone.channel_zones.any? %>
-          <p class="text-muted mb-3"><strong><%= pluralize(@zone.channel_zones.count, "channel") %></strong></p>
-          <div class="list-group"
-               data-controller="sortable"
-               data-sortable-url-value="<%= update_positions_codeplug_zone_path(@codeplug, @zone) %>">
-            <% @zone.channel_zones.order(:position).each do |channel_zone| %>
-              <div class="list-group-item" data-id="<%= channel_zone.id %>">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center flex-grow-1">
+      <% if @zone_systems.any? %>
+        <p class="text-muted mb-3"><strong><%= pluralize(@zone_systems.count, "system") %></strong></p>
+        <div class="list-group"
+             data-controller="sortable"
+             data-sortable-url-value="<%= update_positions_zone_path(@zone) %>">
+          <% @zone_systems.each do |zone_system| %>
+            <div class="list-group-item" data-id="<%= zone_system.id %>">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center flex-grow-1">
+                  <% if @zone.editable_by?(current_user) %>
                     <span class="drag-handle me-3" style="cursor: grab;">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
                         <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                       </svg>
                     </span>
-                    <div class="flex-grow-1">
-                      <strong><%= channel_zone.channel.long_name %></strong>
-                      <% if channel_zone.channel.system %>
-                        <span class="badge bg-info ms-2"><%= channel_zone.channel.system.mode.upcase %></span>
+                  <% end %>
+                  <div class="flex-grow-1">
+                    <strong><%= zone_system.system.name %></strong>
+                    <span class="badge bg-info ms-2"><%= zone_system.system.mode.upcase %></span>
+                    <br>
+                    <small class="text-muted">
+                      <%= zone_system.system.rx_frequency %> MHz
+                      <% if zone_system.system.tx_frequency != zone_system.system.rx_frequency %>
+                        / <%= zone_system.system.tx_frequency %> MHz
                       <% end %>
-                    </div>
-                    <span class="badge bg-secondary me-2"><%= channel_zone.position %></span>
-                    <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, channel_zone.channel), class: "btn btn-sm btn-outline-secondary me-2" %>
-                    <%= button_to "Remove", codeplug_zone_channel_zone_path(@codeplug, @zone, channel_zone),
+                    </small>
+                    <% if zone_system.system.mode == "dmr" || zone_system.system.mode == "p25" %>
+                      <div class="mt-2">
+                        <strong class="text-muted">Talkgroups:</strong>
+                        <% if zone_system.zone_system_talkgroups.any? %>
+                          <div class="d-flex flex-wrap gap-1 mt-1">
+                            <% zone_system.zone_system_talkgroups.includes(system_talk_group: :talk_group).each do |zstg| %>
+                              <span class="badge bg-light text-dark border d-flex align-items-center">
+                                <%= zstg.system_talk_group.talk_group.name %>
+                                (<%= zstg.system_talk_group.talk_group.talkgroup_number %>)
+                                <span class="badge bg-primary ms-1">TS<%= zstg.system_talk_group.timeslot %></span>
+                                <% if @zone.editable_by?(current_user) %>
+                                  <%= button_to zone_zone_system_zone_system_talkgroup_path(@zone, zone_system, zstg),
+                                      method: :delete,
+                                      class: "btn btn-sm p-0 ms-1 text-danger",
+                                      form: { class: "d-inline" },
+                                      data: { turbo_confirm: "Remove this talkgroup?" } do %>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                  <% end %>
+                                <% end %>
+                              </span>
+                            <% end %>
+                          </div>
+                        <% else %>
+                          <span class="text-muted ms-1">None selected</span>
+                        <% end %>
+                        <% if @zone.editable_by?(current_user) %>
+                          <% available_talkgroups = zone_system.system.system_talk_groups.includes(:talk_group).where.not(id: zone_system.zone_system_talkgroups.pluck(:system_talk_group_id)) %>
+                          <% if available_talkgroups.any? %>
+                            <div class="mt-2">
+                              <%= form_with(model: zone_system.zone_system_talkgroups.new, url: zone_zone_system_zone_system_talkgroups_path(@zone, zone_system), method: :post, local: true, class: "d-flex gap-2 align-items-center") do |f| %>
+                                <%= f.select :system_talk_group_id,
+                                    available_talkgroups.map { |stg| ["#{stg.talk_group.name} (#{stg.talk_group.talkgroup_number}) - TS#{stg.timeslot}", stg.id] },
+                                    { prompt: "Select talkgroup..." },
+                                    { class: "form-select form-select-sm", style: "width: auto;" } %>
+                                <%= f.submit "Add Talkgroup", class: "btn btn-sm btn-outline-primary" %>
+                              <% end %>
+                            </div>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <span class="badge bg-secondary me-2"><%= zone_system.position %></span>
+                  <% if @zone.editable_by?(current_user) %>
+                    <%= button_to "Remove", zone_zone_system_path(@zone, zone_system),
                         method: :delete,
                         class: "btn btn-sm btn-outline-danger",
                         form: { class: "d-inline" },
-                        data: { turbo_confirm: "Remove this channel from the zone?" } %>
-                  </div>
+                        data: { turbo_confirm: "Remove this system from the zone?" } %>
+                  <% end %>
                 </div>
-              </div>
-            <% end %>
-          </div>
-        <% else %>
-          <p class="text-muted">No channels in this zone yet. <%= "Add channels using the form above." if @available_channels.any? %></p>
-        <% end %>
-      </div>
-    </div>
-  <% else %>
-    <%# Standalone zone view - show systems %>
-    <div class="card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-title mb-0">Systems</h5>
-        </div>
-
-        <% if @zone.editable_by?(current_user) %>
-          <% available_systems = System.where.not(id: @zone.zone_systems.pluck(:system_id)).order(:name) %>
-          <% if available_systems.any? %>
-            <div class="card mb-3 bg-light">
-              <div class="card-body">
-                <%= form_with(model: @zone.zone_systems.new, url: zone_zone_systems_path(@zone), method: :post, local: true, class: "row g-3") do |f| %>
-                  <div class="col-auto flex-grow-1">
-                    <%= f.select :system_id,
-                        options_from_collection_for_select(available_systems, :id, :name),
-                        { prompt: "Select a system to add..." },
-                        { class: "form-select" } %>
-                  </div>
-                  <div class="col-auto">
-                    <%= f.submit "Add System", class: "btn btn-primary" %>
-                  </div>
-                <% end %>
               </div>
             </div>
           <% end %>
-        <% end %>
-
-        <% if @zone_systems.any? %>
-          <p class="text-muted mb-3"><strong><%= pluralize(@zone_systems.count, "system") %></strong></p>
-          <div class="list-group"
-               data-controller="sortable"
-               data-sortable-url-value="<%= update_positions_zone_path(@zone) %>">
-            <% @zone_systems.each do |zone_system| %>
-              <div class="list-group-item" data-id="<%= zone_system.id %>">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center flex-grow-1">
-                    <% if @zone.editable_by?(current_user) %>
-                      <span class="drag-handle me-3" style="cursor: grab;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-grip-vertical" viewBox="0 0 16 16">
-                          <path d="M7 2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm-3 3a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm3 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                        </svg>
-                      </span>
-                    <% end %>
-                    <div class="flex-grow-1">
-                      <strong><%= zone_system.system.name %></strong>
-                      <span class="badge bg-info ms-2"><%= zone_system.system.mode.upcase %></span>
-                      <br>
-                      <small class="text-muted">
-                        <%= zone_system.system.rx_frequency %> MHz
-                        <% if zone_system.system.tx_frequency != zone_system.system.rx_frequency %>
-                          / <%= zone_system.system.tx_frequency %> MHz
-                        <% end %>
-                      </small>
-                      <% if zone_system.system.mode == "dmr" || zone_system.system.mode == "p25" %>
-                        <div class="mt-2">
-                          <strong class="text-muted">Talkgroups:</strong>
-                          <% if zone_system.zone_system_talkgroups.any? %>
-                            <div class="d-flex flex-wrap gap-1 mt-1">
-                              <% zone_system.zone_system_talkgroups.includes(system_talk_group: :talk_group).each do |zstg| %>
-                                <span class="badge bg-light text-dark border d-flex align-items-center">
-                                  <%= zstg.system_talk_group.talk_group.name %>
-                                  (<%= zstg.system_talk_group.talk_group.talkgroup_number %>)
-                                  <span class="badge bg-primary ms-1">TS<%= zstg.system_talk_group.timeslot %></span>
-                                  <% if @zone.editable_by?(current_user) %>
-                                    <%= button_to zone_zone_system_zone_system_talkgroup_path(@zone, zone_system, zstg),
-                                        method: :delete,
-                                        class: "btn btn-sm p-0 ms-1 text-danger",
-                                        form: { class: "d-inline" },
-                                        data: { turbo_confirm: "Remove this talkgroup?" } do %>
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                      </svg>
-                                    <% end %>
-                                  <% end %>
-                                </span>
-                              <% end %>
-                            </div>
-                          <% else %>
-                            <span class="text-muted ms-1">None selected</span>
-                          <% end %>
-                          <% if @zone.editable_by?(current_user) %>
-                            <% available_talkgroups = zone_system.system.system_talk_groups.includes(:talk_group).where.not(id: zone_system.zone_system_talkgroups.pluck(:system_talk_group_id)) %>
-                            <% if available_talkgroups.any? %>
-                              <div class="mt-2">
-                                <%= form_with(model: zone_system.zone_system_talkgroups.new, url: zone_zone_system_zone_system_talkgroups_path(@zone, zone_system), method: :post, local: true, class: "d-flex gap-2 align-items-center") do |f| %>
-                                  <%= f.select :system_talk_group_id,
-                                      available_talkgroups.map { |stg| ["#{stg.talk_group.name} (#{stg.talk_group.talkgroup_number}) - TS#{stg.timeslot}", stg.id] },
-                                      { prompt: "Select talkgroup..." },
-                                      { class: "form-select form-select-sm", style: "width: auto;" } %>
-                                  <%= f.submit "Add Talkgroup", class: "btn btn-sm btn-outline-primary" %>
-                                <% end %>
-                              </div>
-                            <% end %>
-                          <% end %>
-                        </div>
-                      <% end %>
-                    </div>
-                    <span class="badge bg-secondary me-2"><%= zone_system.position %></span>
-                    <% if @zone.editable_by?(current_user) %>
-                      <%= button_to "Remove", zone_zone_system_path(@zone, zone_system),
-                          method: :delete,
-                          class: "btn btn-sm btn-outline-danger",
-                          form: { class: "d-inline" },
-                          data: { turbo_confirm: "Remove this system from the zone?" } %>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% else %>
-          <p class="text-muted">No systems in this zone yet. <%= "Add systems using the form above." if @zone.editable_by?(current_user) && System.count > 0 %></p>
-        <% end %>
-      </div>
+        </div>
+      <% else %>
+        <p class="text-muted">No systems in this zone yet. <%= "Add systems using the form above." if @zone.editable_by?(current_user) && System.count > 0 %></p>
+      <% end %>
     </div>
-  <% end %>
+  </div>
 </div>
