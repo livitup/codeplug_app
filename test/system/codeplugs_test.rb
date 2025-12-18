@@ -223,12 +223,12 @@ class CodeplugsTest < ApplicationSystemTestCase
     assert_text "Channels - Test Codeplug"
   end
 
-  # Standalone zones in codeplug tests
-  test "codeplug show page displays standalone zones section" do
+  # Zones in codeplug tests
+  test "codeplug show page displays zones section" do
     user = create(:user, email: "test@example.com", password: "password123")
     codeplug = create(:codeplug, user: user, name: "Test Codeplug")
 
-    # Create standalone zones and add to codeplug
+    # Create zones and add to codeplug
     zone1 = create(:zone, user: user, name: "Zone 1", public: false)
     zone2 = create(:zone, user: user, name: "Zone 2", public: false)
     create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
@@ -239,7 +239,7 @@ class CodeplugsTest < ApplicationSystemTestCase
     fill_in "Password", with: "password123"
     click_button "Log In"
 
-    assert_text "Standalone Zones"
+    assert_text "Templates that define what channels to generate"
     assert_text "Zone 1"
     assert_text "Zone 2"
     assert_text "2 zones"

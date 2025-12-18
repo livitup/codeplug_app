@@ -80,8 +80,9 @@ If ANY test fails (even outside your changes), you MUST fix it before creating t
 See `docs/MODELS.md` for complete specifications. Key models:
 
 ### User & Ownership
-- `User` - Rails 8 authentication, owns codeplugs
+- `User` - Rails 8 authentication, owns codeplugs and zones
 - `Codeplug` - User's complete radio configuration (can be public/private)
+- `Zone` - Standalone template owned by user (can be public/private)
 
 ### Radio Hardware (Shared/Universal)
 - `Manufacturer` - Radio manufacturers (Motorola, Baofeng, etc.)
@@ -94,19 +95,24 @@ See `docs/MODELS.md` for complete specifications. Key models:
 - `Network` - Talkgroup organization (Brandmeister, DMRVA, etc.)
 - `TalkGroup` - Digital radio talkgroup
 
-### Join Tables with Metadata
-- `SystemNetwork` - Systems can be on multiple networks
-- `SystemTalkGroup` - Talkgroup + timeslot per system
-- `ChannelZone` - Channel position within zone
+### Zone Architecture (Template-Based)
+- `Zone` - Standalone template defining systems/talkgroups (owned by user, public/private)
+- `ZoneSystem` - Systems in a zone (with position)
+- `ZoneSystemTalkGroup` - Talkgroups for digital systems in a zone
+- `CodeplugZone` - Links zones to codeplugs (with position)
 
-### User's Configuration
-- `Zone` - Logical grouping of channels (unlimited size in app)
-- `Channel` - User's configuration to access a System (references System + adds settings)
+### Channel Management
+- `Channel` - Generated from zones or manually created (has `source_zone_id` for tracking)
+- `ChannelZone` - Channel position within zone
+- `SystemTalkGroup` - Talkgroup + timeslot per system
 
 ### Key Relationships
+- Zone → ZoneSystem → ZoneSystemTalkGroup (defines what to generate)
+- Codeplug → CodeplugZone → Zone (links zones to codeplugs)
 - Channel → System (pulls in frequencies, tones)
 - Channel → SystemTalkGroup (for digital: talkgroup + timeslot)
-- Channel ↔ Zone (many-to-many with position)
+- Channel → source_zone (tracks which zone generated this channel)
+- Channel ↔ Zone via ChannelZone (many-to-many with position)
 - System → ModeDetail (polymorphic: analog/DMR/P25/etc.)
 
 ---
@@ -117,7 +123,8 @@ See `docs/MODELS.md` for complete specifications. Key models:
 - Complex multi-step operations
 - CSV export/import logic
 - Orchestrating multiple models
-- Example: `CodeplugExporter`, `CsvImporter`
+- Channel generation from zones
+- Example: `ChannelGenerator`, `CodeplugExporter`, `CsvImporter`
 
 ### When to Use Form Objects
 - Forms spanning multiple models
@@ -216,6 +223,35 @@ end
 
 ## Important Business Logic
 
+### Zone Workflow (Template-Based Architecture)
+Zones are standalone templates that define what channels should be generated:
+
+1. **Create Zone**: User creates a zone (private by default, can be made public)
+2. **Add Systems**: User adds systems to the zone via ZoneSystem
+3. **Add Talkgroups**: For digital systems, user adds talkgroups via ZoneSystemTalkGroup
+4. **Add to Codeplug**: User adds zones to codeplug via CodeplugZone
+5. **Generate Channels**: User clicks "Generate Channels" to create channels from zones
+6. **Customize**: User can edit generated channels (changes persist until regeneration)
+
+### Channel Generation Logic
+The `ChannelGenerator` service creates channels from zones:
+- **Analog systems**: Creates one channel per system
+- **Digital systems**: Creates one channel per ZoneSystemTalkGroup
+- Sets `source_zone_id` to track which zone generated the channel
+- Creates `ChannelZone` records with sequential positions
+- With `regenerate: true`: Destroys existing channels first
+
+```ruby
+generator = ChannelGenerator.new(codeplug)
+result = generator.generate_channels(regenerate: false)
+# => { channels_created: 5, zones_processed: 2, skipped: false }
+```
+
+### Public vs Private Zones
+- Private zones: Only owner can view/edit/use
+- Public zones: Any user can view and add to their codeplugs
+- Use `Zone.available_to_user(user)` scope to get zones a user can see
+
 ### Polymorphic Mode Details
 Systems have different attributes based on mode:
 - **DMR**: color_code (0-15)
@@ -229,6 +265,7 @@ Use polymorphic association: `System belongs_to :mode_detail, polymorphic: true`
 - Channel references a **System** (gets frequencies, tones)
 - For digital systems, Channel references **SystemTalkGroup** (includes timeslot)
 - Channel adds user preferences (power, bandwidth override, tone_mode)
+- Channel has `source_zone_id` if it was generated from a zone
 
 ### Tone Handling
 - System has `tx_tone_value` and `rx_tone_value` (CTCSS/DCS codes)
@@ -572,4 +609,4 @@ When helping with this project:
 
 ---
 
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-12-17
