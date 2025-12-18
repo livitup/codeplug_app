@@ -222,7 +222,7 @@ export default class extends Controller {
         if (headerCounts[header] > 1) {
           field.classList.add("border-warning")
           const warning = document.createElement("span")
-          warning.className = "duplicate-warning badge bg-warning text-dark ms-2"
+          warning.className = "duplicate-warning badge bg-warning text-dark ms-2 me-2"
           warning.textContent = "Duplicate"
           headerInput.after(warning)
         }
