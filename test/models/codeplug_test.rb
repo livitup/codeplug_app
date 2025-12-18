@@ -54,14 +54,21 @@ class CodeplugTest < ActiveSupport::TestCase
     assert_equal :belongs_to, association.macro
   end
 
-  test "should have many zones" do
+  test "should have many zones through codeplug_zones" do
     codeplug = create(:codeplug)
     assert_respond_to codeplug, :zones
   end
 
-  test "zones association should be configured with dependent destroy" do
+  test "zones association should be configured as through" do
     association = Codeplug.reflect_on_association(:zones)
     assert_not_nil association, "zones association should exist"
+    assert_equal :has_many, association.macro
+    assert_equal :codeplug_zones, association.options[:through]
+  end
+
+  test "should have many codeplug_zones with dependent destroy" do
+    association = Codeplug.reflect_on_association(:codeplug_zones)
+    assert_not_nil association, "codeplug_zones association should exist"
     assert_equal :has_many, association.macro
     assert_equal :destroy, association.options[:dependent]
   end
@@ -79,11 +86,17 @@ class CodeplugTest < ActiveSupport::TestCase
   end
 
   # Dependent Destroy Tests
-  test "destroying codeplug should destroy associated zones" do
-    codeplug = create(:codeplug)
-    # Note: Zones will be created in a later issue, so this test will fail until then
-    # For now, we're just testing the association configuration exists
-    skip "Zone model not yet implemented"
+  test "destroying codeplug should destroy associated codeplug_zones" do
+    user = create(:user)
+    codeplug = create(:codeplug, user: user)
+    zone = create(:zone, user: user)
+    codeplug_zone = create(:codeplug_zone, codeplug: codeplug, zone: zone, position: 1)
+
+    assert_difference("CodeplugZone.count", -1) do
+      codeplug.destroy!
+    end
+    # Zone itself should still exist (it's standalone)
+    assert Zone.exists?(zone.id)
   end
 
   test "destroying codeplug should destroy associated channels" do

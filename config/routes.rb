@@ -52,13 +52,6 @@ Rails.application.routes.draw do
         patch :update_positions
       end
     end
-    # Nested zones routes (kept for backward compatibility, will be deprecated)
-    resources :zones do
-      resources :channel_zones, only: [ :create, :destroy ]
-      member do
-        patch :update_positions
-      end
-    end
     resources :channels
   end
 

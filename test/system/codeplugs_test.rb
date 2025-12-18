@@ -85,9 +85,13 @@ class CodeplugsTest < ApplicationSystemTestCase
     user = create(:user, email: "test@example.com", password: "password123")
     codeplug = create(:codeplug, user: user, name: "Test Codeplug")
 
-    # Create some zones and channels
-    zone1 = create(:zone, codeplug: codeplug, long_name: "Zone 1")
-    zone2 = create(:zone, codeplug: codeplug, long_name: "Zone 2")
+    # Create standalone zones and add to codeplug via CodeplugZone
+    zone1 = create(:zone, user: user, name: "Zone 1", long_name: "Zone 1")
+    zone2 = create(:zone, user: user, name: "Zone 2", long_name: "Zone 2")
+    create(:codeplug_zone, codeplug: codeplug, zone: zone1, position: 1)
+    create(:codeplug_zone, codeplug: codeplug, zone: zone2, position: 2)
+
+    # Create channels
     system = create(:system, mode: "dmr")
     channel1 = create(:channel, codeplug: codeplug, system: system, long_name: "Channel 1")
     channel2 = create(:channel, codeplug: codeplug, system: system, long_name: "Channel 2")
