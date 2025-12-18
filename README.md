@@ -28,12 +28,21 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architectural deci
 The application manages several key entities:
 
 - **Codeplugs**: User's complete radio configuration
-- **Channels**: Individual channel configurations referencing systems
-- **Zones**: Logical groupings of channels (unlimited in app, split on export)
-- **Systems**: Repeater/simplex frequencies with technical specs
+- **Zones**: Standalone templates defining systems and talkgroups (public/private)
+- **Channels**: Generated from zones or manually created
+- **Systems**: Repeater/simplex frequencies with technical specs (shared resource)
 - **TalkGroups**: Digital radio talkgroup definitions organized by networks
 - **Radio Models**: Radio hardware specifications and capabilities
 - **Codeplug Layouts**: CSV export format definitions for specific radios
+
+### Zone Architecture
+
+Zones use a template-based approach:
+- Zones are **standalone entities** owned by users (not embedded in codeplugs)
+- Zones can be **public** (shareable) or **private**
+- Zones define which **systems** and **talkgroups** to include
+- Channels are **generated** from zones when the user is ready
+- Generated channels can be **customized** (changes persist until regeneration)
 
 See [docs/MODELS.md](docs/MODELS.md) for complete data model documentation.
 
@@ -87,6 +96,11 @@ The seed data creates:
 - 1 development user account
 - 10 radio manufacturers
 - 10 realistic radio models with specifications
+- Sample networks (Brandmeister, TGIF, P25 Network)
+- Sample systems (analog and DMR repeaters)
+- Sample talkgroups
+- Sample zones with systems and talkgroups
+- Sample codeplug with generated channels
 
 ### 5. Start Development Server
 
@@ -253,14 +267,32 @@ rails db:rollback
 
 ## User Workflows
 
-### Creating a Codeplug
+### Creating Zones (Templates)
 
 1. User registers/logs in
-2. Creates a new Codeplug
-3. Adds Systems (repeaters) with location and technical specs
-4. Creates Channels referencing Systems
-5. Organizes Channels into Zones
+2. Navigates to "Zones" in the navigation menu
+3. Creates a new Zone (name, optional long/short names)
+4. Adds Systems to the zone (analog repeaters, DMR repeaters, etc.)
+5. For digital systems, adds Talkgroups (with timeslot info)
+6. Optionally marks the zone as "Public" to share with other users
+
+### Creating a Codeplug
+
+1. User creates a new Codeplug
+2. Adds Zones to the codeplug (own zones or public zones from other users)
+3. Reorders zones as desired using drag-and-drop
+4. Clicks "Generate Channels" to create channels from the zone templates
+5. Optionally customizes generated channels (name, power level, etc.)
 6. Exports Codeplug for specific Radio Model
+
+### Regenerating Channels
+
+If you modify zones (add systems/talkgroups) after generating channels:
+1. Navigate to the codeplug
+2. Click "Regenerate Channels"
+3. Confirm the regeneration (existing channels will be replaced)
+4. New channels are generated from the updated zone templates
+5. Any previous customizations will be lost
 
 ### Exporting to Radio Format
 
@@ -430,4 +462,4 @@ Built with:
 
 **Version**: 0.1.0 (Initial Development)
 
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-12-17

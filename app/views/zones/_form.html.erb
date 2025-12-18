@@ -1,4 +1,12 @@
 <%= form_with model: zone do |f| %>
+  <div class="alert alert-info mb-4">
+    <strong>What is a Zone?</strong>
+    <p class="mb-0 mt-1">
+      Zones are templates that define which systems (repeaters) and talkgroups you want on your radio.
+      After creating a zone, you'll add systems to it, then add the zone to your codeplug to generate channels.
+    </p>
+  </div>
+
   <% if zone.errors.any? %>
     <div class="alert alert-danger">
       <h5><%= pluralize(zone.errors.count, "error") %> prohibited this zone from being saved:</h5>
@@ -32,7 +40,10 @@
     <div class="form-check">
       <%= f.check_box :public, class: "form-check-input" %>
       <%= f.label :public, "Make this zone public", class: "form-check-label" %>
-      <div class="form-text">Public zones can be viewed by all users. Private zones are only visible to you.</div>
+      <div class="form-text">
+        Public zones can be viewed and added to codeplugs by any user.
+        This is useful for sharing commonly used repeater groups with the community.
+      </div>
     </div>
   </div>
 

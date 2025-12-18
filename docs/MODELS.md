@@ -6,14 +6,39 @@ This document defines all data models for the Codeplug Application. The app foll
 
 ## Core Concepts
 
-- **System**: A radio repeater or simplex frequency with technical specifications
-- **Channel**: A user's configuration to access a System (references System + adds user preferences)
-- **Zone**: A logical grouping of Channels (unlimited size in app, split on export if needed)
-- **Codeplug**: A user's complete radio programming (contains Zones and Channels)
+- **System**: A radio repeater or simplex frequency with technical specifications (shared resource)
+- **Zone**: A standalone template defining which systems and talkgroups to include (owned by user, can be public/private)
+- **Channel**: A user's configuration to access a System, generated from zones or created manually
+- **Codeplug**: A user's complete radio programming configuration (contains generated channels, references zones)
 - **RadioModel**: A specific make/model of radio with capabilities and limits
 - **CodeplugLayout**: The CSV export format for a specific RadioModel
 - **TalkGroup**: Digital radio talkgroup (DMR, P25, etc.)
 - **Network**: Organization of TalkGroups (e.g., Brandmeister, DMRVA)
+
+---
+
+## Zone Architecture Overview
+
+The zone architecture follows a template-based approach:
+
+```
+Zone (template, owned by user)
+├── ZoneSystem (systems in this zone)
+│   └── ZoneSystemTalkGroup (talkgroups for digital systems)
+└── Linked to Codeplugs via CodeplugZone
+
+Codeplug (user's radio configuration)
+├── CodeplugZone (references to zones, ordered)
+└── Channels (generated from zones or manual)
+    └── ChannelZone (channel position within zones)
+```
+
+**Workflow:**
+1. User creates standalone Zones with Systems and Talkgroups
+2. User adds Zones to a Codeplug via CodeplugZone
+3. User clicks "Generate Channels" to create Channels from the zones
+4. Channels are created with `source_zone_id` tracking their origin
+5. User can customize generated channels (changes persist until regeneration)
 
 ---
 
@@ -27,12 +52,12 @@ Standard Rails 8 authentication model with user preferences.
 - `password_digest` (string, required)
 - `name` (string)
 - `callsign` (string) - ham radio callsign
-- User preference columns (TBD as needed):
-  - `default_power_level` (string)
-  - `measurement_preference` (string) - display format preferences
+- `default_power_level` (string)
+- `measurement_preference` (string) - display format preferences
 
 **Associations:**
 - `has_many :codeplugs`
+- `has_many :zones` - standalone zones owned by user
 
 **Validations:**
 - Email presence and uniqueness
@@ -45,9 +70,12 @@ Radio manufacturers (Motorola, Baofeng, Kenwood, etc.)
 
 **Attributes:**
 - `name` (string, required, unique)
+- `system_record` (boolean) - true for system-provided records
+- `user_id` (integer, foreign key, nullable) - creator for user-defined records
 
 **Associations:**
 - `has_many :radio_models`
+- `belongs_to :user, optional: true`
 
 **Validations:**
 - Name presence and uniqueness
@@ -67,42 +95,30 @@ Specific radio make/model with capabilities and constraints.
 - `short_channel_name_length` (integer)
 - `long_zone_name_length` (integer)
 - `short_zone_name_length` (integer)
-- `frequency_ranges` (text/json) - array of hashes: `[{band: "2m", min: 144.0, max: 148.0}, {band: "70cm", min: 420.0, max: 450.0}]`
+- `frequency_ranges` (text/json) - array of hashes
+- `system_record` (boolean) - true for system-provided records
+- `user_id` (integer, foreign key, nullable) - creator for user-defined records
 
 **Associations:**
 - `belongs_to :manufacturer`
+- `belongs_to :user, optional: true`
 - `has_many :codeplug_layouts`
 
 **Validations:**
 - Manufacturer presence
 - Name presence
 - At least one supported mode
-- Positive integers for zone/channel limits and name lengths
-
-**Notes:**
-- Frequency ranges stored as serialized array/JSON for flexibility
-- Some radios are "single zone" (treat as 1 zone with X channels)
 
 ---
 
 ### CodeplugLayout
-Defines CSV export format for a specific RadioModel. Stores field mappings so users can customize export formats.
+Defines CSV export format for a specific RadioModel.
 
 **Attributes:**
 - `radio_model_id` (integer, foreign key, required)
 - `name` (string, required) - e.g., "Chirp CSV Format", "CPS Standard"
 - `user_id` (integer, foreign key, nullable) - creator, null for system defaults
-- `layout_definition` (text/json) - field mapping configuration:
-  ```json
-  {
-    "columns": [
-      {"header": "Channel Name", "maps_to": "long_name"},
-      {"header": "RX Freq", "maps_to": "system.rx_frequency"},
-      {"header": "TX Freq", "maps_to": "system.tx_frequency"},
-      {"header": "Power", "maps_to": "power_level"}
-    ]
-  }
-  ```
+- `layout_definition` (text/json) - field mapping configuration
 
 **Associations:**
 - `belongs_to :radio_model`
@@ -113,10 +129,6 @@ Defines CSV export format for a specific RadioModel. Stores field mappings so us
 - Name presence
 - Valid JSON structure for layout_definition
 
-**Notes:**
-- Users can create custom layouts via field picker interface
-- System-provided layouts have `user_id: null`
-
 ---
 
 ### Network
@@ -126,19 +138,15 @@ Organization/network that operates TalkGroups (e.g., Brandmeister, DMRVA).
 - `name` (string, required, unique)
 - `description` (text)
 - `website` (string)
-- `network_type` (string) - e.g., "DMR", "P25", "NXDN"
+- `network_type` (string) - e.g., "Digital-DMR", "Digital-P25", "Digital-NXDN"
 
 **Associations:**
-- `has_many :talkgroups`
+- `has_many :talk_groups`
 - `has_many :system_networks`
 - `has_many :systems, through: :system_networks`
 
 **Validations:**
 - Name presence and uniqueness
-
-**Notes:**
-- Users can create new networks
-- Network may be specific to a digital mode or support multiple
 
 ---
 
@@ -153,8 +161,8 @@ Digital radio talkgroup identifier (DMR, P25, etc.).
 
 **Associations:**
 - `belongs_to :network`
-- `has_many :system_talkgroups`
-- `has_many :systems, through: :system_talkgroups`
+- `has_many :system_talk_groups`
+- `has_many :systems, through: :system_talk_groups`
 
 **Validations:**
 - Network presence
@@ -175,16 +183,13 @@ A radio repeater or simplex frequency with technical specifications. Shared acro
 - `mode` (string, required, enum) - "analog", "dmr", "p25", "nxdn", etc.
 - `tx_frequency` (decimal, required) - repeater transmit (radio receive)
 - `rx_frequency` (decimal, required) - repeater receive (radio transmit)
-- `bandwidth` (string) - default bandwidth (e.g., "25kHz", "12.5kHz")
+- `bandwidth` (string) - default bandwidth
 - `supports_tx_tone` (boolean, default: false)
 - `supports_rx_tone` (boolean, default: false)
-- `tx_tone_value` (string, nullable) - e.g., "127.3", "065"
+- `tx_tone_value` (string, nullable)
 - `rx_tone_value` (string, nullable)
-- `city` (string)
-- `state` (string)
-- `county` (string)
-- `latitude` (decimal)
-- `longitude` (decimal)
+- `city`, `state`, `county` (strings)
+- `latitude`, `longitude` (decimals)
 - `mode_detail_id` (integer, foreign key, polymorphic)
 - `mode_detail_type` (string, polymorphic)
 
@@ -192,20 +197,16 @@ A radio repeater or simplex frequency with technical specifications. Shared acro
 - `belongs_to :mode_detail, polymorphic: true`
 - `has_many :system_networks`
 - `has_many :networks, through: :system_networks`
-- `has_many :system_talkgroups`
-- `has_many :talkgroups, through: :system_talkgroups`
+- `has_many :system_talk_groups`
+- `has_many :talk_groups, through: :system_talk_groups`
 - `has_many :channels`
+- `has_many :zone_systems`
+- `has_many :zones, through: :zone_systems`
 
 **Validations:**
 - Name, mode, tx_frequency, rx_frequency presence
 - Valid mode from enum
 - Frequencies within valid ranges
-- Tone values from valid CTCSS/DCS list if present
-
-**Notes:**
-- Tone values stored as strings: "127.3" or "065"
-- Mode-specific attributes stored in polymorphic mode_detail
-- Location data optional but recommended
 
 ---
 
@@ -216,23 +217,13 @@ Base for mode-specific system attributes.
 **Attributes:**
 - `color_code` (integer, required, 0-15)
 
-**Validations:**
-- Color code between 0 and 15
-
 #### P25ModeDetail
 **Attributes:**
-- `nac` (string, required) - Network Access Code, e.g., "293"
-
-**Validations:**
-- NAC presence and format
+- `nac` (string, required) - Network Access Code
 
 #### AnalogModeDetail
 **Attributes:**
-- (May not need any additional attributes, or could store analog-specific settings)
-
-**Notes:**
-- Additional mode detail models (NxdnModeDetail, etc.) added as needed
-- Each mode detail model has specific validations for its attributes
+- (No additional attributes needed)
 
 ---
 
@@ -248,36 +239,28 @@ Associates Systems with Networks (many-to-many).
 - `belongs_to :network`
 
 **Validations:**
-- System and network presence
 - Unique combination of system_id and network_id
-
-**Notes:**
-- Most systems connected to one network, but some support multiple
-- Used to filter available talkgroups when building channels
 
 ---
 
 ### SystemTalkGroup (Join Table)
-Associates TalkGroups with Systems, including mode-specific attributes like timeslot.
+Associates TalkGroups with Systems, including timeslot for DMR.
 
 **Attributes:**
 - `system_id` (integer, foreign key, required)
-- `talkgroup_id` (integer, foreign key, required)
-- `timeslot` (integer, nullable) - DMR timeslot (1 or 2), null for non-DMR
+- `talk_group_id` (integer, foreign key, required)
+- `timeslot` (integer, nullable) - DMR timeslot (1 or 2)
 
 **Associations:**
 - `belongs_to :system`
-- `belongs_to :talkgroup`
+- `belongs_to :talk_group`
 - `has_many :channels`
+- `has_many :zone_system_talk_groups`
 
 **Validations:**
-- System and talkgroup presence
-- Unique combination of system, talkgroup, and timeslot
+- System and talk_group presence
+- Unique combination of system, talk_group, and timeslot
 - Timeslot 1 or 2 if present (DMR only)
-
-**Notes:**
-- Same talkgroup can be on different timeslots on different systems
-- Channels reference SystemTalkGroup (not just TalkGroup) to capture timeslot
 
 ---
 
@@ -288,87 +271,181 @@ User's complete radio programming configuration.
 - `user_id` (integer, foreign key, required)
 - `name` (string, required)
 - `description` (text)
-- `public` (boolean, default: false) - whether other users can view/clone
+- `public` (boolean, default: false)
 
 **Associations:**
 - `belongs_to :user`
-- `has_many :zones, dependent: :destroy`
 - `has_many :channels, dependent: :destroy`
+- `has_many :codeplug_zones, dependent: :destroy`
+- `has_many :zones, through: :codeplug_zones`
 
 **Validations:**
 - User presence
 - Name presence
 
 **Notes:**
-- A codeplug is the "meta" configuration, independent of specific radios
+- Zones are linked via CodeplugZone (many-to-many)
+- Channels are generated from zones or created manually
 - Can be exported to multiple radio formats
 
 ---
 
 ### Zone
-Logical grouping of channels within a codeplug. No size limits in app (handled on export).
+Standalone template defining which systems and talkgroups to include. Owned by a user and can be public or private.
 
 **Attributes:**
-- `codeplug_id` (integer, foreign key, required)
+- `user_id` (integer, foreign key, required)
 - `name` (string, required)
 - `long_name` (string) - for radios supporting long zone names
 - `short_name` (string) - for radios requiring short zone names
+- `public` (boolean, default: false) - whether other users can view/use
 
 **Associations:**
-- `belongs_to :codeplug`
+- `belongs_to :user`
+- `has_many :zone_systems, dependent: :destroy`
+- `has_many :systems, through: :zone_systems`
+- `has_many :codeplug_zones, dependent: :destroy`
+- `has_many :codeplugs, through: :codeplug_zones`
 - `has_many :channel_zones, dependent: :destroy`
 - `has_many :channels, through: :channel_zones`
 
+**Scopes:**
+- `publicly_visible` - zones marked as public
+- `owned_by(user)` - zones owned by specific user
+- `available_to_user(user)` - public zones OR owned by user
+
+**Methods:**
+- `editable_by?(user)` - true if user owns the zone
+- `viewable_by?(user)` - true if public OR owned by user
+
 **Validations:**
-- Codeplug presence
+- User presence
 - Name presence
 
 **Notes:**
-- Zones have unlimited channels in app
-- On export, if zone exceeds radio's max_channels_per_zone, prompt user for split strategy
-- Radios without zone concept treated as "single zone" with X channels
+- Zones are templates, not containers
+- Public zones can be added to any user's codeplug
+- Systems and talkgroups define what channels will be generated
+
+---
+
+### ZoneSystem (Join Table)
+Associates Systems with Zones, with position tracking.
+
+**Attributes:**
+- `zone_id` (integer, foreign key, required)
+- `system_id` (integer, foreign key, required)
+- `position` (integer, required) - order within zone
+
+**Associations:**
+- `belongs_to :zone`
+- `belongs_to :system`
+- `has_many :zone_system_talkgroups, dependent: :destroy`
+- `has_many :system_talkgroups, through: :zone_system_talkgroups`
+
+**Validations:**
+- Zone and system presence
+- Position > 0
+- Unique system within zone
+- Unique position within zone
+
+**Notes:**
+- Position determines system order when generating channels
+- For digital systems, talkgroups are added via ZoneSystemTalkGroup
+
+---
+
+### ZoneSystemTalkGroup (Join Table)
+Associates SystemTalkGroups with ZoneSystems for digital modes.
+
+**Attributes:**
+- `zone_system_id` (integer, foreign key, required)
+- `system_talk_group_id` (integer, foreign key, required)
+
+**Associations:**
+- `belongs_to :zone_system`
+- `belongs_to :system_talk_group`
+
+**Validations:**
+- ZoneSystem and SystemTalkGroup presence
+- Unique combination
+- SystemTalkGroup must belong to the same system as the ZoneSystem
+
+**Notes:**
+- Only used for digital systems (DMR, P25, NXDN)
+- Each ZoneSystemTalkGroup results in one generated channel
+
+---
+
+### CodeplugZone (Join Table)
+Associates Zones with Codeplugs, with position tracking.
+
+**Attributes:**
+- `codeplug_id` (integer, foreign key, required)
+- `zone_id` (integer, foreign key, required)
+- `position` (integer, required) - order within codeplug
+
+**Associations:**
+- `belongs_to :codeplug`
+- `belongs_to :zone`
+
+**Validations:**
+- Codeplug and zone presence
+- Position > 0
+- Unique zone within codeplug
+- Unique position within codeplug
+
+**Default Scope:**
+- Ordered by position ascending
+
+**Notes:**
+- Position determines zone order when generating channels
+- Same zone can be in multiple codeplugs
 
 ---
 
 ### Channel
-User's configuration to access a System. References System and adds user/radio-specific settings.
+User's configuration to access a System. Can be generated from zones or created manually.
 
 **Attributes:**
 - `codeplug_id` (integer, foreign key, required)
 - `system_id` (integer, foreign key, required)
-- `system_talkgroup_id` (integer, foreign key, nullable) - only for digital modes
+- `system_talk_group_id` (integer, foreign key, nullable) - only for digital modes
+- `source_zone_id` (integer, foreign key, nullable) - zone this channel was generated from
 - `name` (string, required)
 - `long_name` (string)
 - `short_name` (string)
-- `power_level` (string) - e.g., "High", "Low", "Medium"
-- `bandwidth` (string, nullable) - overrides system default if set
+- `power_level` (string)
+- `bandwidth` (string, nullable)
 - `tone_mode` (string, enum) - "none", "tx_only", "rx_only", "tx_rx"
-- `transmit_permission` (string, enum) - values TBD, includes "forbid_tx" option
+- `transmit_permission` (string, enum) - "allow", "forbid_tx"
 
 **Associations:**
 - `belongs_to :codeplug`
 - `belongs_to :system`
-- `belongs_to :system_talkgroup, optional: true`
+- `belongs_to :system_talk_group, optional: true`
+- `belongs_to :source_zone, class_name: "Zone", optional: true`
 - `has_many :channel_zones, dependent: :destroy`
 - `has_many :zones, through: :channel_zones`
+
+**Methods:**
+- `generated?` - true if source_zone_id is present
 
 **Validations:**
 - Codeplug and system presence
 - Name presence
 - Valid tone_mode from enum
 - Valid transmit_permission from enum
-- system_talkgroup required if system mode is digital (business logic)
-- tone_mode must respect system's supports_tx_tone and supports_rx_tone
 
 **Notes:**
-- Channel inherits system data (frequencies, tones) and adds user preferences
-- A channel can appear in multiple zones at different positions
-- For digital systems, must reference a SystemTalkGroup to capture talkgroup + timeslot
+- `source_zone_id` tracks which zone the channel was generated from
+- Generated channels can be customized; changes persist until regeneration
+- For digital systems, must reference a SystemTalkGroup
 
 ---
 
 ### ChannelZone (Join Table)
-Associates Channels with Zones, with position/sequence tracking.
+Associates Channels with Zones, with position tracking.
 
 **Attributes:**
 - `channel_id` (integer, foreign key, required)
@@ -381,13 +458,12 @@ Associates Channels with Zones, with position/sequence tracking.
 
 **Validations:**
 - Channel and zone presence
-- Position is positive integer
-- Unique position within a zone
+- Position > 0
+- Unique position within zone
 
 **Notes:**
 - Position determines channel order within zone
 - Same channel can be at different positions in different zones
-- Users can reorder channels within zones
 
 ---
 
@@ -398,7 +474,6 @@ Associates Channels with Zones, with position/sequence tracking.
 - `dmr`
 - `p25`
 - `nxdn`
-- Additional modes added as needed
 
 ### Tone Mode
 - `none` - no tones
@@ -407,31 +482,49 @@ Associates Channels with Zones, with position/sequence tracking.
 - `tx_rx` - both transmit and receive tones
 
 ### Transmit Permission
-- TBD - will include options like:
-  - `always` - always allow transmit
-  - `forbid_tx` - receive only
-  - Additional options as needed
+- `allow` - transmit allowed
+- `forbid_tx` - receive only
 
 ---
 
-## CTCSS/DCS Tone Values
+## Services
 
-Tones stored as strings in database. Valid values maintained in application config/constant.
+### ChannelGenerator
+Service class that generates channels from zones for a codeplug.
 
-**CTCSS (Hz):**
-- "67.0", "71.9", "74.4", "77.0", "79.7", "82.5", "85.4", "88.5", "91.5", "94.8", "97.4", "100.0", "103.5", "107.2", "110.9", "114.8", "118.8", "123.0", "127.3", "131.8", "136.5", "141.3", "146.2", "151.4", "156.7", "162.2", "167.9", "173.8", "179.9", "186.2", "192.8", "203.5", "210.7", "218.1", "225.7", "233.6", "241.8", "250.3"
+**Usage:**
+```ruby
+generator = ChannelGenerator.new(codeplug)
+result = generator.generate_channels(regenerate: false)
+# => { channels_created: 5, channel_zones_created: 5, zones_processed: 2, skipped: false }
+```
 
-**DCS (Codes):**
-- "023", "025", "026", "031", "032", "036", "043", "047", "051", "053", "054", "065", "071", "072", "073", "074", "114", "115", "116", "122", "125", "131", "132", "134", "143", "145", "152", "155", "156", "162", "165", "172", "174", "205", "212", "223", "225", "226", "243", "244", "245", "246", "251", "252", "255", "261", "263", "265", "266", "271", "274", "306", "311", "315", "325", "331", "332", "343", "346", "351", "356", "364", "365", "371", "411", "412", "413", "423", "431", "432", "445", "446", "452", "454", "455", "462", "464", "465", "466", "503", "506", "516", "523", "526", "532", "546", "565", "606", "612", "624", "627", "631", "632", "654", "662", "664", "703", "712", "723", "731", "732", "734", "743", "754"
-
-**Display Format:**
-- CTCSS displayed with "Hz" suffix in UI: "127.3 Hz"
-- DCS displayed as-is: "065"
-- Export format varies by radio (some want "Hz", some don't)
+**Behavior:**
+- For analog systems: creates one channel per system
+- For digital systems: creates one channel per ZoneSystemTalkGroup
+- Sets `source_zone_id` on generated channels
+- Creates ChannelZone records with correct positions
+- With `regenerate: true`: destroys existing channels first
+- Without `regenerate`: skips if channels already exist
 
 ---
 
 ## Business Rules & Constraints
+
+### Zone Architecture
+1. Zones are standalone entities owned by users
+2. Zones can be public (viewable/usable by all) or private
+3. Zones define systems and talkgroups, not channels directly
+4. Zones are linked to codeplugs via CodeplugZone
+5. Channels are generated from zones using ChannelGenerator
+
+### Channel Generation Logic
+1. Process zones in CodeplugZone position order
+2. Within each zone, process systems in ZoneSystem position order
+3. For analog systems: create one channel per system
+4. For digital systems: create one channel per ZoneSystemTalkGroup
+5. Set source_zone_id to track origin
+6. Create ChannelZone with sequential positions
 
 ### Channel/System/Talkgroup Logic
 1. If system mode is digital, channel must reference a system_talkgroup
@@ -445,27 +538,17 @@ Tones stored as strings in database. Valid values maintained in application conf
    - If zone exceeds limit, prompt user for split strategy
    - Generate physical zones on-the-fly during export
 
-### System/Network/Talkgroup Filtering
-1. When user selects a System for a Channel, only show TalkGroups from Networks the System is connected to
-2. Show SystemTalkGroup options (includes timeslot) rather than raw TalkGroups
-
-### Simplex Systems
-- For simplex operation (no repeater), create a System where tx_frequency == rx_frequency
-- Could have a "simplex" mode or use "analog"/"dmr" mode with matching frequencies
-
 ---
 
-## Future Considerations
+## CTCSS/DCS Tone Values
 
-Features to add in later iterations:
-- Import codeplug from CSV (with auto-detect of format)
-- Export history/audit log
-- Codeplug versioning
-- Shared/community codeplugs
-- Frequency allocation validation (regulatory compliance)
-- Simplex frequency library (common calling frequencies, etc.)
-- Channel templates
-- Bulk operations (clone channels, mass edit, etc.)
+Tones stored as strings in database.
+
+**CTCSS (Hz):**
+- "67.0", "71.9", "74.4", "77.0", "79.7", "82.5", "85.4", "88.5", "91.5", "94.8", "97.4", "100.0", "103.5", "107.2", "110.9", "114.8", "118.8", "123.0", "127.3", "131.8", "136.5", "141.3", "146.2", "151.4", "156.7", "162.2", "167.9", "173.8", "179.9", "186.2", "192.8", "203.5", "210.7", "218.1", "225.7", "233.6", "241.8", "250.3"
+
+**DCS (Codes):**
+- "023", "025", "026", "031", "032", "036", "043", "047", "051", "053", "054", "065", "071", "072", "073", "074", etc.
 
 ---
 
@@ -473,12 +556,15 @@ Features to add in later iterations:
 
 Recommended indexes for performance:
 - `users.email` (unique)
-- `radio_models.manufacturer_id`
-- `systems.mode`
-- `systems.latitude, systems.longitude` (for geographic queries)
-- `talkgroups.network_id`
-- `system_talkgroups.system_id, system_talkgroups.talkgroup_id`
+- `zones.user_id`
+- `zones.public`
+- `zone_systems.zone_id, zone_systems.position` (unique)
+- `zone_systems.zone_id, zone_systems.system_id` (unique)
+- `zone_system_talk_groups.zone_system_id, zone_system_talk_groups.system_talk_group_id` (unique)
+- `codeplug_zones.codeplug_id, codeplug_zones.position` (unique)
+- `codeplug_zones.codeplug_id, codeplug_zones.zone_id` (unique)
 - `channels.codeplug_id`
 - `channels.system_id`
-- `channel_zones.zone_id, channel_zones.position`
+- `channels.source_zone_id`
+- `channel_zones.zone_id, channel_zones.position` (unique)
 - Foreign key indexes on all join tables
