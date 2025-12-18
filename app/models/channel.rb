@@ -8,8 +8,14 @@ class Channel < ApplicationRecord
   belongs_to :codeplug
   belongs_to :system
   belongs_to :system_talk_group, optional: true
+  belongs_to :source_zone, class_name: "Zone", optional: true
   has_many :channel_zones, dependent: :destroy
   has_many :zones, through: :channel_zones
+
+  # Convenience method to check if channel was generated
+  def generated?
+    source_zone_id.present?
+  end
 
   # Validations
   validates :name, presence: true

@@ -1,6 +1,11 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1><%= @channel.name %></h1>
+    <div class="d-flex align-items-center">
+      <h1 class="mb-0"><%= @channel.name %></h1>
+      <% if @channel.generated? %>
+        <span class="badge bg-info ms-3">Generated</span>
+      <% end %>
+    </div>
     <div>
       <%= link_to "Edit", edit_codeplug_channel_path(@codeplug, @channel), class: "btn btn-secondary me-2" %>
       <%= button_to "Delete", codeplug_channel_path(@codeplug, @channel), method: :delete,
@@ -75,6 +80,18 @@
           </div>
           <div class="col-md-6">
             <strong>Timeslot:</strong> <%= @channel.system_talk_group.timeslot || "—" %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @channel.generated? %>
+        <hr>
+
+        <h5 class="card-title mt-3">Generation Source</h5>
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <strong>Source Zone:</strong>
+            <%= link_to @channel.source_zone.name, zone_path(@channel.source_zone), class: "btn btn-sm btn-outline-secondary" %>
           </div>
         </div>
       <% end %>

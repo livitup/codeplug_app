@@ -37,7 +37,7 @@ class ChannelGenerator
           # For digital systems, create one channel per talkgroup
           zone_system.zone_system_talkgroups.includes(system_talk_group: :talk_group).each do |zone_system_talkgroup|
             system_talk_group = zone_system_talkgroup.system_talk_group
-            channel = create_digital_channel(system, system_talk_group)
+            channel = create_digital_channel(system, system_talk_group, zone)
 
             if channel.persisted?
               create_channel_zone(channel, zone, channel_position)
@@ -48,7 +48,7 @@ class ChannelGenerator
           end
         else
           # For analog systems, create one channel per system
-          channel = create_analog_channel(system)
+          channel = create_analog_channel(system, zone)
 
           if channel.persisted?
             create_channel_zone(channel, zone, channel_position)
@@ -74,9 +74,10 @@ class ChannelGenerator
     %w[dmr p25 nxdn].include?(system.mode)
   end
 
-  def create_analog_channel(system)
+  def create_analog_channel(system, source_zone)
     codeplug.channels.create!(
       system: system,
+      source_zone: source_zone,
       name: system.name,
       long_name: system.name,
       short_name: generate_short_name(system.name),
@@ -85,13 +86,14 @@ class ChannelGenerator
     )
   end
 
-  def create_digital_channel(system, system_talk_group)
+  def create_digital_channel(system, system_talk_group, source_zone)
     talkgroup_name = system_talk_group.talk_group.name
     long_name = "#{system.name} - #{talkgroup_name}"
 
     codeplug.channels.create!(
       system: system,
       system_talk_group: system_talk_group,
+      source_zone: source_zone,
       name: talkgroup_name,
       long_name: long_name,
       short_name: generate_short_name(talkgroup_name),

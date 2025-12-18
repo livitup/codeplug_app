@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_06_035936) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_15_054858) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,12 +38,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_06_035936) do
     t.string "name", null: false
     t.string "power_level"
     t.string "short_name"
+    t.bigint "source_zone_id"
     t.bigint "system_id", null: false
     t.bigint "system_talk_group_id"
     t.string "tone_mode", default: "none", null: false
     t.string "transmit_permission", default: "allow", null: false
     t.datetime "updated_at", null: false
     t.index ["codeplug_id"], name: "index_channels_on_codeplug_id"
+    t.index ["source_zone_id"], name: "index_channels_on_source_zone_id"
     t.index ["system_id"], name: "index_channels_on_system_id"
     t.index ["system_talk_group_id"], name: "index_channels_on_system_talk_group_id"
   end
@@ -243,6 +245,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_06_035936) do
   add_foreign_key "channels", "codeplugs"
   add_foreign_key "channels", "system_talk_groups"
   add_foreign_key "channels", "systems"
+  add_foreign_key "channels", "zones", column: "source_zone_id"
   add_foreign_key "codeplug_layouts", "radio_models"
   add_foreign_key "codeplug_layouts", "users"
   add_foreign_key "codeplug_zones", "codeplugs"
