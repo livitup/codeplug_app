@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   # Associations
   has_many :codeplugs, dependent: :destroy
+  has_many :zones, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: { case_sensitive: false }
